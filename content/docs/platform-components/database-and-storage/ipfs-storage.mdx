@@ -1,6 +1,6 @@
 ---
 title: IPFS Storage
-description: Guide to using storage solutions in SettleMint
+description: Guide to using IPFS storage solutions in SettleMint
 ---
 
 import { Tabs, Tab } from "fumadocs-ui/components/tabs";
@@ -8,10 +8,63 @@ import { Callout } from "fumadocs-ui/components/callout";
 import { Steps } from "fumadocs-ui/components/steps";
 import { Card } from "fumadocs-ui/components/card";
 
-Managing complex or large data in decentralized systems can be a challenge. To
-securely store and share your files and data, SettleMint offers two storage
-solutions that can interact with the blockchain: **IPFS (decentralized)** and
-**MinIO (centralized)**.
+**InterPlanetary File System (IPFS)** is a **decentralized and distributed file storage system** designed to enhance the way data is stored and accessed on the web. Unlike traditional cloud storage solutions that rely on centralized servers, **IPFS stores content across a peer-to-peer (P2P) network**, making it **efficient, secure, and resilient** against failures and censorship.
+
+Within **SettleMint**, **IPFS is available as a storage option**, allowing developers to **store, retrieve, and manage files seamlessly** for blockchain applications. It enables **off-chain data storage**, ensuring that blockchain networks remain efficient while still being able to reference large datasets securely.
+[Learn more on IPFS here](https://docs.ipfs.tech/concepts/)
+
+### Why Use IPFS?
+
+- **Decentralized & Fault-Tolerant** – No single point of failure.
+- **Content Addressability** – Files are retrieved using unique cryptographic **Content Identifiers (CIDs)** rather than URLs.
+- **Efficient Storage & Bandwidth Optimization** – Files are **de-duplicated and distributed** across nodes.
+- **Ideal for Blockchain Applications** – Enables **off-chain storage** while linking data securely to on-chain smart contracts.
+- **Scalable & Cost-Effective** – No dependency on expensive centralized storage solutions.
+
+---
+
+SettleMint offers **IPFS as a decentralized storage solution**, allowing users to store data in a **distributed, verifiable, and tamper-proof manner**. This is particularly useful for **storing large files, metadata, documents, NFTs, and other digital assets** that would otherwise be expensive or inefficient to store directly on-chain.
+
+### Features of IPFS Storage in SettleMint
+
+- **Seamless File Upload & Retrieval** – Store files and retrieve them via **CIDs**.
+- **Blockchain Integration** – Reference IPFS-stored files within **smart contracts**.
+- **Secure & Immutable Storage** – Files stored on IPFS remain **tamper-proof**.
+- **Enhanced Performance** – Optimized file access through **IPFS gateways**.
+- **Redundancy & Availability** – Files are distributed across the network for increased resilience.
+
+---
+
+## API Reference
+
+SettleMint provides **multiple APIs** for interacting with IPFS:
+
+| **Method** | **Endpoint**            | **Description**                                    |
+|------------|-------------------------|----------------------------------------------------|
+| `POST`     | `/ipfs/upload`          | Uploads a file to IPFS and returns its **CID**.   |
+| `GET`      | `/ipfs/{CID}`           | Retrieves a file from IPFS using its **CID**.     |
+| `POST`     | `/ipfs/pin/{CID}`       | Pins a file to prevent it from being removed.     |
+| `DELETE`   | `/ipfs/unpin/{CID}`     | Unpins a file, allowing it to be garbage collected. |
+
+For full API specifications, refer to **SettleMint’s API documentation**.
+
+---
+
+## Credentials & Authentication
+
+To interact with **SettleMint’s IPFS cluster**, users need authentication credentials:
+
+| **Credential**             | **Description** |
+|----------------------------|------------------------------------------------|
+| **Cluster API Username**   | Identifies the IPFS cluster user. |
+| **Cluster API Password**   | Required for **authentication**. |
+| **Peer ID**                | Unique identifier for the node in the IPFS network. |
+| **Public Key**             | Used for **cryptographic verification**. |
+| **Private Key**            | Enables secure **signing of IPFS transactions**. |
+| **Pinning JWT Token**      | Required for interacting with the **Pinning API**. |
+
+These credentials ensure **secure access** to the IPFS storage layer.
+
 
 ## Add Storage
 
@@ -113,58 +166,54 @@ solutions that can interact with the blockchain: **IPFS (decentralized)** and
   </Tab>
 </Tabs>
 
-## About IPFS (decentralized)
 
-The InterPlanetary File System (IPFS) is a peer-to-peer network for storing and
-sharing data in a distributed file system. When uploading a file to IPFS it
-generates a unique fingerprint (hash). Later when querying that data it will use
-that fingerprint to find nodes storing the data behind this fingerprint. This
-means that this hash is not only a key used to retrieve a file, but it also
-serves as a proof of integrity. Often such fingerprints will be stored on chain
-in order to act as a bridge between the blockchain and IPFS.
+## Use Cases for IPFS in Blockchain Applications
 
-[Learn more on IPFS here](https://docs.ipfs.tech/concepts/)
+### 1. **Smart Contract Data Storage**  
+   - Instead of storing large data **on-chain**, store it **off-chain** on IPFS and reference the **CID** in smart contracts.
+   - Example: **Legal documents, digital agreements, audit records**.
 
-## About MinIO (centralized - S3 compatible)
+### 2. **NFT Metadata & Digital Assets**  
+   - Store **metadata, images, and media** for NFTs in a decentralized and tamper-proof manner.
+   - Example: **NFT artwork, game assets, token metadata**.
 
-For private or confidential data, MinIO would be your preferred option.
+### 3. **Decentralized Identity & Credentials**  
+   - Store and verify **identity documents, certificates, and credentials** securely on IPFS.
+   - Example: **Verifiable credentials in education, healthcare, and finance**.
 
-[Learn more on MinIO here](https://min.io/)
+### 4. **Immutable Data Storage for Regulatory Compliance**  
+   - Ensure **auditable and tamper-proof records** for compliance-heavy industries.
+   - Example: **Financial records, compliance reports, supply chain tracking**.
 
-MinIO is S3-compatible. If you want to **set up a MinIO client for AWS S3**, you
-need these parameters:
+---
 
-**endPoint** The endpoint is the URL to object storage service. Example value:
-example-minio-123a.settlemint.com, unique-name.settlemint.com (you can get the
-unique name from the Details tab)
+## Best Practices & Considerations
 
-**accessKey** The access key is like a user ID that uniquely identifies your
-account. You can get your access key under the **Connect tab**
+- **Pinning Important Files** – IPFS operates on a caching mechanism, meaning files may be garbage-collected if not pinned.
+- **CID Management** – Since CIDs are content-based hashes, file updates result in new CIDs. Maintain proper reference tracking.
+- **Security & Privacy** – IPFS is **public by default**. For sensitive data, consider **encryption before storing files**.
 
-**secretKey** The secret key is like the password to your account. You can get
-your secret key under the **Connect tab**.
+---
 
-```js
-var Minio = require("minio");
+## Troubleshooting
 
-var s3Client = new Minio.Client({
-  endPoint: "your-minio-instance.settlemint.com",
-  accessKey: "YOUR-ACCESSKEYID",
-  secretKey: "YOUR-SECRETACCESSKEY",
-});
-```
+- **File Not Found?** – Ensure the file is **pinned** and accessible through an active IPFS node.
+- **Slow Retrieval?** – Use **SettleMint’s dedicated IPFS gateway** or public **IPFS gateways** for faster access.
+- **Storage Limitations?** – Consider using **external pinning services** to maintain long-term file availability.
 
-You can now use the s3Client object to call methods like `makeBucket`,
-`getObject`, and
-[many more methods which you can find here](https://docs.min.io/docs/javascript-client-api-reference.html).
+For further assistance, refer to **SettleMint's documentation** or the **official IPFS documentation**.
 
-<Callout type="info">
-  MinIO client can also be configured in Python, .NET, Java, Golang, Haskell.
-  You can follow the [quickstart guides provided by MinIO
-  here](https://docs.min.io/docs/java-client-quickstart-guide.html) for more
-  information.
-</Callout>
+---
 
-<Callout type="info">
-  All operations require appropriate permissions in your workspace.
-</Callout>
+## Additional Resources
+
+- **[IPFS Official Documentation](https://docs.ipfs.io/)**
+- **[SettleMint Platform Guide](https://console.settlemint.com/documentation)**
+- **[IPFS GitHub Repository](https://github.com/ipfs/ipfs)**
+- **[IPFS & Blockchain Use Cases](https://ipfs.io/#use-cases)**
+
+---
+
+
+IPFS provides a **scalable, decentralized, and efficient** storage solution for blockchain applications. Within **SettleMint**, IPFS can be easily used as a **storage option**, allowing users to **store, retrieve, and reference files** with minimal setup. 
+By integrating IPFS into blockchain workflows, developers can ensure **secure, tamper-proof, and cost-efficient off-chain storage**, while keeping essential references **on-chain**.
