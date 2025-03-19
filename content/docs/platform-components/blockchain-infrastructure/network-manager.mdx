@@ -1,0 +1,426 @@
+---
+title: Network Manager
+description:
+  Blockchain network manager offers a user-friendly interface for configuring
+  private permissioned networks, connecting to Layer 1 and Layer 2 public
+  networks, and joining existing external networks.
+---
+
+## Key Capabilities
+
+### Create Private Permissioned Networks
+
+- Deploy **Hyperledger Besu, Hyperledger Fabric, or Quorum** networks with
+  pre-configured templates and guided workflows, ensuring rapid setup for
+  enterprise use cases.
+
+### Connect with Public Networks
+
+- Seamlessly integrate with **Ethereum, Polygon, Hedera, Avalanche, Arbitrum,
+  Optimism**, and other leading public blockchains, enabling hybrid solutions
+  that leverage both public and private networks.
+
+### Join External Networks
+
+- Use **SettleMint’s tooling** to connect to existing networks, expand
+  infrastructure, or migrate to the SettleMint platform, providing flexibility
+  for organizations with pre-existing blockchain deployments.
+
+### Join via Invitation Code
+
+- Easily connect to **pre-existing networks** within SettleMint using an
+  invitation code, streamlining collaboration in consortium setups.
+
+---
+
+## Supported Networks
+
+The SettleMint Network Manager supports a wide range of blockchain protocols,
+catering to both private permissioned and public network requirements. Below is
+a summary of the supported networks:
+
+| Network Type    | Protocol           | Description                                                            |
+| --------------- | ------------------ | ---------------------------------------------------------------------- |
+| Permissioned    | Hyperledger Besu   | Enterprise-grade permissioned blockchain with IBFT and QBFT consensus. |
+| Permissioned    | Quorum             | Ethereum fork with privacy features and encrypted transactions.        |
+| Permissioned    | Hyperledger Fabric | Modular blockchain with pluggable consensus and customizable policies. |
+| Public L1       | Ethereum           | Decentralized blockchain with PoS, known for smart contracts.          |
+| Public L1       | Avalanche          | High-speed chain with subnet support and PoS.                          |
+| Public L1       | Hedera Hashgraph   | Scalable public ledger with aBFT and low fees.                         |
+| Public L2       | Polygon PoS        | Ethereum sidechain for faster, cheaper transactions.                   |
+| Public L2       | Polygon zkEVM      | Zero-knowledge rollup for efficient Ethereum scaling.                  |
+| Public L2       | Optimism           | Optimistic Rollup solution for Ethereum scalability.                   |
+| Public L2       | Arbitrum           | Optimistic Rollup for improved Ethereum performance and lower fees.    |
+---
+
+## Network Deployment & Configuration
+
+### EVM-Based Private Networks (Besu, Quorum)
+
+Users can configure the following parameters before deploying a private
+permissioned **EVM-based network**:
+
+| Parameter           | Description                                                     |
+| ------------------- | --------------------------------------------------------------- |
+| Chain ID            | A unique identifier for the blockchain network.                 |
+| Seconds per Block   | Time interval for block creation.                               |
+| Gas Price           | Minimum gas price required for transactions (specified in wei). |
+| Gas Limit           | Maximum amount of gas allowed per block.                        |
+| EVM Stack Size      | Maximum stack size for the Ethereum Virtual Machine (EVM).      |
+| Contract Size Limit | Maximum size of a smart contract in kilobytes (KB).             |
+
+#### Genesis Block Configuration
+
+The `genesis.json` file is a critical component of EVM-based blockchain
+networks, defining the initial state and parameters of the blockchain to ensure
+secure and structured network operations. Key elements include:
+
+- **Chain ID**: Uniquely identifies the network to prevent replay attacks.
+- **Consensus Mechanism**: Determines how blocks are validated, providing the
+  necessary governance structure (e.g., IBFT, QBFT, PoA, PoS).
+- **Pre-allocated Balances**: Specify the initial allocation of tokens for
+  specific addresses.
+- **QBFT Validator Information**: Defines the nodes responsible for validating
+  transactions in Quorum Byzantine Fault Tolerance (QBFT)-based networks.
+
+#### Developer Integrations
+
+The SettleMint Network Manager provides developer-friendly tools to facilitate
+smart contract development and network interactions:
+
+- **Faucet Wallets**: Enable test token distribution for private networks,
+  making it easier for developers to test transactions.
+- **Genesis file availability**: Users can access and download `genesis.json`
+  file, allowing for easy network expansion outside SettleMint platform.
+
+### Hyperledger Fabric Networks
+
+Users can configure the following settings before deploying a **Fabric
+network**:
+
+| Parameter                    | Description                                                                              |
+| ---------------------------- | ---------------------------------------------------------------------------------------- |
+| Endorsement Policy           | Defines transaction endorsement requirements ("By all peers" or "By majority of peers"). |
+| Batch Timeout                | Time before transactions are grouped into a block.                                       |
+| Max Messages in Batch        | Maximum number of messages in a batch.                                                   |
+| Absolute Max Bytes in Batch  | Upper limit on batch size in megabytes (MB).                                             |
+| Preferred Max Bytes in Batch | Preferred batch size in megabytes (MB).                                                  |
+
+#### Channel Configuration and Policies
+
+Hyperledger Fabric networks use a `configtx.json` file to define network
+channels, membership rules, and policies. Key components include:
+
+- **Application Group**: Defines policies for participating organizations,
+  specifying details such as:
+  - **Organization Name**
+  - **Policies**:
+    - **Admin**: Roles allow users to modify configurations.
+    - **Endorsement**: Policies require transaction approvals from specific
+      peers.
+    - **Readers and Writers**: Policies define access to channel data.
+- **Orderer Group**: Configures the ordering service responsible for transaction
+  finalization. Settings include:
+  - **Batch Timeout**: Determines the time before transactions are grouped into
+    a block.
+  - **Max Messages Per Batch**: Controls block size.
+- **Consensus Type**: Typically `etcdraft`, a Raft-based ordering service.
+
+#### Network Governance and Security
+
+Hyperledger Fabric networks require robust security and governance mechanisms:
+
+- **Membership Service Provider (MSP)**: Controls identity verification and
+  authentication, ensuring only authorized participants can access the network.
+- **Root Certificates and TLS Certificates**: Define trusted entities for secure
+  communication.
+- **Endorsement Policies**: Determine how transactions are validated across
+  organizations, enforcing compliance and preventing unauthorized modifications.
+- **Block Validation Policies**: Ensure the integrity and security of the
+  distributed ledger, maintaining network trustworthiness.
+
+---
+
+## Network Monitoring & Management
+
+### EVM-Based Networks
+
+The **dashboard** provides insights into:
+
+- **Network Details**: Name, deployment location, creation date, blockchain
+  version, protocol type.
+- **Key Configurations**: Chain ID, block time, gas price, gas limit, contract
+  size limit, EVM stack size.
+- **Genesis File Access**: Contains initial network configuration.
+
+#### System Recommendations
+
+> **Recommendation**  
+> At least **four validator nodes** are required to ensure **Byzantine Fault
+> Tolerance**.
+
+#### Faucet Wallet
+
+- Includes **mnemonic phrase, private key, derivation path, Ethereum address**.
+- Provides a **large test balance** for development and testing.
+
+#### Public Network Monitoring Parameters
+
+The **dashboard** provides real-time analytics on:
+
+- Best block height
+- Current gas price
+- Current gas used
+- Block height over time
+- Suggested gas price over time
+- Gas used over time
+- Transactions per block
+- Pending transactions over time
+- Gas limit over time
+- Block size over time
+- Geographical location of nodes
+
+#### Monitoring and Analytics
+
+The Network Manager provides real-time insights into network performance:
+
+- **Current Block Height**: Represents the latest block processed.
+- **Transaction Volume**: Gives an overview of the number and frequency of
+  transactions, allowing organizations to analyze usage trends.
+- **Node Health Monitoring**: Ensures that validator and RPC nodes remain active
+  and operational.
+- **Gas Consumption**: Analytics provide insights into network congestion and
+  transaction costs.
+- **Pending Transactions**: Monitoring helps identify potential bottlenecks in
+  the system, enhancing troubleshooting and optimization efforts.
+
+### Hyperledger Fabric Networks
+
+The **dashboard** offers comprehensive network monitoring, including:
+
+- **Network Overview**: Name, deployment location, creation date, blockchain
+  version, protocol type, channel ID, MSP ID.
+- **Channel Configuration JSON File Access**.
+- **Batch Processing Settings**:
+  - Timeout
+  - Maximum messages
+  - Batch size
+
+#### Real-Time Performance Monitoring
+
+- Number and location of nodes.
+- Active consensus nodes and cluster size.
+- Latest block committed.
+- Real-time transaction monitoring, allowing users to keep track of all
+  blockchain activities.
+- Health status of orderer and peer nodes.
+- Performance analytics, including block generation times, to help organizations
+  optimize their blockchain operations.
+- Endorsement policy compliance tracking to ensure transactions adhere to
+  predefined security and governance policies.
+
+#### System Recommendations
+
+> **Recommendation**  
+> Alerts for **fault tolerance** and **orderer node requirements** are provided
+> in the system.
+
+#### Key Benefits
+
+- Simplifies the deployment process for Hyperledger Fabric networks through a
+  guided setup approach.
+- Efficiently configures access control, consensus models, and governance
+  settings, ensuring a seamless blockchain deployment experience.
+- Designed for scalability, supporting multi-organization setups with secure
+  identity management.
+- Integrated monitoring provides organizations with real-time insights into
+  network performance and compliance adherence.
+
+---
+
+# Supported Blockchain Network protocols
+
+## Private Permissioned Networks
+
+SettleMint’s Network Manager excels at creating and managing private
+permissioned networks, which are ideal for enterprises requiring strict control
+over data privacy, access, and governance. Below are the supported frameworks,
+enriched with additional details and practical use cases:
+
+### Hyperledger Besu
+
+Hyperledger Besu is a highly popular permissioned blockchain framework offering
+**enterprise-grade security**, **private transactions**, and **governance
+control**. It supports **Istanbul Byzantine Fault Tolerance (IBFT)** and
+**Quorum Byzantine Fault Tolerance (QBFT)** consensus mechanisms, ensuring
+robust fault tolerance and efficient transaction finalization. Besu is
+Ethereum-compatible, allowing organizations to leverage Ethereum’s smart
+contract capabilities in a private setting.
+
+- **Key Features**:
+  - Private transactions via Tessera, a privacy layer for off-chain data
+    sharing.
+  - High performance with configurable consensus mechanisms.
+  - Compatibility with Ethereum tools like Truffle and Remix for smart contract
+    development.
+
+### Quorum
+
+Quorum is a private Ethereum fork designed for enterprises that need **encrypted
+transactions** and **privacy features**. It extends Ethereum’s smart contract
+functionality with privacy enhancements, making it suitable for industries like
+finance and healthcare where data confidentiality is critical. Quorum supports
+**Raft** and **IBFT** consensus, offering flexibility for different performance
+and fault-tolerance needs.
+
+- **Key Features**:
+  - Privacy through private transactions and contract execution.
+  - Ethereum compatibility, enabling the use of existing Ethereum smart
+    contracts.
+  - High throughput with Raft consensus for faster transaction processing.
+
+### Hyperledger Fabric
+
+Hyperledger Fabric is a **modular blockchain framework** tailored for enterprise
+use cases, offering **pluggable consensus mechanisms** and **customizable
+endorsement policies**. It is widely adopted in business settings that require
+**robust security**, **efficient performance**, and **flexible governance**.
+Fabric’s channel architecture allows organizations to create private
+sub-networks within a larger network, ensuring data isolation.
+
+- **Key Features**:
+  - Channels for private data sharing between specific participants.
+  - Pluggable consensus (e.g., Raft, Kafka) for performance optimization.
+  - Endorsement policies to enforce transaction validation rules.
+
+### Consortium Manager & Participant Permissions
+
+In SettleMint, the **Consortium Manager** provides a centralized interface to
+manage participants in private networks. It allows the network administrator to
+define **granular permissions** for each participant, ensuring
+**enterprise-class security** and **decentralized decision-making**. Permissions
+can include:
+
+- Ability to add validating nodes to the network.
+- Authority to invite new members to the consortium.
+- Rights to manage governance policies, such as updating endorsement rules or
+  consensus settings.
+
+- **Benefits**:
+  - Fine-tuned access control ensures that only authorized participants can
+    perform critical actions.
+  - Decentralized governance fosters trust among consortium members.
+  - Simplified management reduces administrative overhead for large networks.
+
+---
+
+## Layer 1 (L1) Public Networks
+
+The Network Manager enables seamless integration with Layer 1 public
+blockchains, which serve as the foundational infrastructure for decentralized
+applications. These networks are ideal for use cases requiring global
+accessibility and decentralization.
+
+### Ethereum
+
+Ethereum is a **decentralized blockchain** that has transitioned to **Proof of
+Stake (PoS)** with the Ethereum 2.0 upgrade, significantly reducing energy
+consumption. It is renowned for its **extensive developer community**, **smart
+contract capabilities**, and **robust ecosystem** of decentralized applications
+(dApps). Ethereum’s native token, ETH, powers transactions and smart contract
+execution.
+
+- **Key Features**:
+  - Smart contracts written in Solidity, enabling complex automation.
+  - Large ecosystem of tools, libraries, and dApps.
+  - PoS consensus for improved scalability and sustainability.
+
+### Avalanche
+
+Avalanche is a **high-speed Layer 1 blockchain** with **subnet support**,
+enabling the creation of custom, application-specific blockchains. It uses a
+**Proof of Stake (PoS)** consensus mechanism, delivering **low-cost
+transactions** and **near-instant finality**. Avalanche’s architecture supports
+high throughput, making it suitable for demanding applications.
+
+- **Key Features**:
+  - Subnets for isolated, customizable blockchain environments.
+  - High throughput with transaction finality in under 2 seconds.
+  - EVM compatibility for easy migration of Ethereum dApps.
+
+### Hedera Hashgraph
+
+Hedera Hashgraph is a **scalable public ledger** that uses **asynchronous
+Byzantine Fault Tolerance (aBFT)** for consensus, ensuring **enterprise-level
+security** and **high performance**. It offers **low fees** and **predictable
+pricing**, making it ideal for applications requiring cost efficiency and
+reliability. Hedera’s native token, HBAR, is used for transaction fees and
+network services.
+
+- **Key Features**:
+  - aBFT consensus for high security and fault tolerance.
+  - Scalability with up to 10,000 transactions per second.
+  - Fixed, low-cost fees for predictable budgeting.
+
+---
+
+## Layer 2 (L2) Public Networks
+
+Layer 2 solutions enhance the scalability of Layer 1 blockchains like Ethereum
+by processing transactions off-chain while leveraging the mainnet for security.
+The Network Manager supports leading L2 networks, enabling cost-effective and
+high-performance operations.
+
+### Polygon PoS
+
+Polygon Proof of Stake (PoS) is a **sidechain** for Ethereum that offers
+**faster transactions** and **lower fees** compared to the Ethereum mainnet. It
+is connected to Ethereum via a bridge, ensuring **security** and
+**interoperability**. Polygon PoS is widely used for applications requiring high
+transaction throughput.
+
+- **Key Features**:
+  - Near-instant transactions with minimal fees.
+  - Full Ethereum compatibility for smart contracts and dApps.
+  - Bridging mechanism for secure asset transfers between Polygon and Ethereum.
+
+### Polygon zkEVM
+
+Polygon zkEVM is a **zero-knowledge rollup (zk-rollup)** solution that provides
+**greater efficiency** by bundling transactions off-chain and submitting proofs
+to Ethereum. It combines the benefits of zero-knowledge cryptography with
+Ethereum’s security, offering **privacy** and **scalability** for demanding
+applications.
+
+- **Key Features**:
+  - zk-rollups for high throughput and low costs.
+  - EVM compatibility for seamless dApp migration.
+  - Enhanced privacy through zero-knowledge proofs.
+
+### Optimism
+
+Optimism uses **Optimistic Rollups** to group off-chain transactions into
+batches, which are then verified on Ethereum. This approach significantly
+reduces transaction costs and latency while maintaining Ethereum’s security
+guarantees. Optimism is designed to be developer-friendly, supporting Ethereum’s
+existing tools and infrastructure.
+
+- **Key Features**:
+  - Optimistic Rollups for cost-effective scaling.
+  - Near-identical Ethereum experience for developers.
+  - Fast transaction confirmation with Ethereum finality.
+
+### Arbitrum
+
+Arbitrum is another leading **Optimistic Rollup** solution that improves
+Ethereum’s **scalability** and **reduces fees**. It processes transactions
+off-chain and submits them to Ethereum for validation, ensuring security while
+enhancing performance. Arbitrum is widely adopted for its ease of use and
+compatibility with Ethereum dApps.
+
+- **Key Features**:
+  - High throughput with reduced gas costs.
+  - Full EVM compatibility for smart contracts.
+  - Seamless integration with Ethereum’s ecosystem.
+
+---

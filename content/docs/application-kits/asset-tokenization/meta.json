@@ -1,0 +1,5 @@
+{
+  "label": "Asset Tokenization",
+  "icon": "Grid2x2Plus",
+  "pages": ["contracts", "usecases", "asset-tokenization-kit"]
+}

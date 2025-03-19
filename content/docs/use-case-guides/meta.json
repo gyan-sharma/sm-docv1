@@ -1,0 +1,12 @@
+{
+  "title": "Use Case Guides",
+  "icon": "Code",
+  "pages": [
+
+    "asset-tokenization",
+    "supply-chain",
+    "document-management",
+    "digital-identity-and-verification",
+    "attestation-service"
+  ]
+}

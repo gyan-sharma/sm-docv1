@@ -1,0 +1,14 @@
+{
+  "label": "Hyperledger Fabric Guide",
+  "title": "Hyperledger Fabric Guide",
+  "icon": "Grid2x2Plus",
+  "pages": [
+    "create-an-organization-and-application",
+    "add-private-keys-wallets-and-access-tokens",
+    "add-a-network-nodes-and-explorer",
+    "setup-code-studio-deploy-chaincode",
+    "setup-fabconnect-middleware",
+    "setup-storage-and-offchain-database",
+    "deploy-frontend-or-custom-services"
+  ]
+}

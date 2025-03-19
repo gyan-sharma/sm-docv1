@@ -1,0 +1,5 @@
+{
+  "label": "Dev Tools",
+  "icon": "Code",
+  "pages": ["code-studio", "sdk", "cli", "mcp"]
+}

@@ -1,0 +1,49 @@
+{
+  "name": "docs",
+  "version": "7.0.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "start": "next start",
+    "lint": "next lint",
+    "format": "prettier --write .",
+    "postinstall": "fumadocs-mdx",
+    "docker": "bash -c \"docker buildx build . --provenance true --sbom true --platform=linux/amd64,linux/arm64 -t ghcr.io/settlemint/btp-docs:${VERSION:-7.0.0-dev.$(date +%s)} --push --progress=plain\""
+  },
+  "dependencies": {
+    "@next/third-parties": "15.2.2",
+    "@theguild/remark-mermaid": "0.2.0",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "fumadocs-core": "15.0.18",
+    "fumadocs-docgen": "2.0.0",
+    "fumadocs-mdx": "11.5.6",
+    "fumadocs-twoslash": "3.1.0",
+    "fumadocs-ui": "15.0.18",
+    "lucide-react": "0.482.0",
+    "next": "^15.2.2",
+    "prettier": "3.5.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "3.0.2",
+    "tailwindcss-animate": "1.0.7",
+    "ultracite": "4.1.21"
+  },
+  "devDependencies": {
+    "@fumadocs/cli": "0.0.8",
+    "@tailwindcss/postcss": "4.0.14",
+    "@types/mdx": "2.0.13",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
+    "babel-plugin-react-compiler": "19.0.0-beta-e552027-20250112",
+    "postcss": "8.5.3",
+    "tailwindcss": "4.0.14",
+    "typescript": "5.8.2",
+    "eslint": "9.22.0",
+    "eslint-config-next": "15.2.2",
+    "@eslint/eslintrc": "3.3.0",
+    "@eslint/js": "9.22.0"
+  }
+}

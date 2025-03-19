@@ -1,0 +1,13 @@
+{
+  "label": "Building with SettleMint",
+  "title": "Building with SettleMint",
+  "icon": "Grid2x2Plus",
+  "pages": [
+    "getting-started",
+    "planning-and-decisions",
+    "evm-chains-guide",
+    "hyperledger-fabric-guide",
+    "hedera-hashgraph-guide",
+    "ai-assisted-programming"
+  ]
+}
