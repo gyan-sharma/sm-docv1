@@ -4,6 +4,7 @@
   "icon": "Grid2x2Plus",
   "pages": [
     "getting-started",
+    "setup-account-and-billing",
     "planning-and-decisions",
     "evm-chains-guide",
     "hyperledger-fabric-guide",

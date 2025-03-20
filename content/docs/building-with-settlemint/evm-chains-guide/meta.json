@@ -3,10 +3,10 @@
   "title": "EVM Chains Guide",
   "icon": "Grid2x2Plus",
   "pages": [
-  "create-an-organization-and-application", 
+  "setup-account-and-billing", 
+  "create-an-organization-and-application",
   "add-network-nodes-and-explorer",
   "add-private-keys-and-user-wallets",
-
   "setup-code-studio-deploy-smart-contracts",
   "setup-graph-middleware-and-api-portal",
   "setup-storage-and-offchain-database",
