@@ -4,7 +4,7 @@ description: Blockchain Transaction Signer in SettleMint
 ---
 
 
-# Blockchain Transaction Signer  
+## Blockchain Transaction Signer  
 
 ## Introduction  
 
@@ -24,9 +24,9 @@ Transaction signing follows these key steps:
 By signing transactions locally before submission, users ensure that their private keys remain secure and are never exposed to the network.  
 
 ---
+![Transaction Signer](../../../img/building-with-settlemint/transaction-signer.png)
 
-
-# SettleMint Blockchain Platform: Transaction Signing  
+## SettleMint Blockchain Platform: Transaction Signing  
 
 SettleMint allows blockchain nodes to **automatically sign transactions** using pre-attached private keys. This process ensures seamless execution of transactions such as **smart contract interactions, token transfers, and API-driven blockchain operations**.  
 
@@ -47,18 +47,16 @@ The platform supports **`eth_sendTransaction`**, enabling automated signing for 
 SettleMint provides multiple ways to attach private keys securely to blockchain nodes:  
 
 ### **1. SettleMint Dashboard Configuration**  
-- Users can upload private keys securely via the **SettleMint UI**.  
+- Users can create private keys securely via the **SettleMint UI**.  
 - The private key is encrypted and stored within the **node’s secure environment**.  
 
-### **2. Environment Variable Injection**  
-- Private keys can be assigned to nodes using **environment variables** such as `PRIVATE_KEY` or `SIGNER_KEY`.  
-- The node accesses the private key at runtime for transaction signing.  
+![Transaction Signer Keys Mapping](../../../img/building-with-settlemint/signer-key-mapping.png)
 
-### **3. Hardware Security Module (HSM) or Vault Integration**  
+### **2.  Hardware Security Module (HSM) or Vault Integration**  
 - SettleMint allows integration with **AWS KMS, HashiCorp Vault, and other secure key management services**.  
 - This approach keeps private keys **off-chain and protected from unauthorized access**.  
 
-### **4. Remote Signing via API**  
+### **3. Remote Signing via API**  
 - Instead of storing private keys on nodes, SettleMint supports **external signing services** that handle digital signatures remotely.  
 - This enhances security by **reducing node exposure** to potential attacks.  
 
