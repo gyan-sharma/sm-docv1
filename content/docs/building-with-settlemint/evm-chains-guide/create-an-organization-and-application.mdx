@@ -10,16 +10,11 @@ import { Card } from "fumadocs-ui/components/card";
 
 ## How to create an organization and application in SettleMint platform
 
-An organization is the highest level of hierarchy in SettleMint.
+An organization is the highest level of hierarchy in SettleMint. It's at this level that you can  create and manage blockchain applications, invite team members to collaborate and manage billing. 
 
 ![Organization and Applications](../../../img/building-with-settlemint/organization_and_application.png)
 
-It's at this level that you:
-
-- Create and manage
-  [blockchain applications](/building-with-settlemint/create-an-application)
-- [Invite team members](#invite-new-organization-members) to collaborate
-- Manage [billing](/account-billing/billing)
+![Add Organization](../../../img/building-with-settlemint/add-org.png)
 
 You created your first organization when you signed up to use the SettleMint
 platform, but you can create as many organizations as you want, e.g. for your
@@ -33,26 +28,35 @@ work, manage collaboration, and keep your invoices clearly organized.
 
     Navigate to the <strong>homepage</strong>, or click the <strong>grid icon</strong> in the upper right corner.
 
-    <p>
-      Click <strong>Create new organization</strong>. This opens a form. Follow these steps to create your organization:
-    </p>
-    <p>
-      Choose a <strong>name</strong> for your organization. Choose a name that is easily
-      recognizable in your dashboards, e.g. your company name, department name, team name, etc.
-      You can change the name of your organization at any time.
-    </p>
+    Click <strong>Create new organization</strong>. This opens a form. Follow these steps to create your organization:
+
+    Choose a <strong>name</strong> for your organization. Choose a name that is easily
+    recognizable in your dashboards, e.g. your company name, department name, team name, etc.
+    You can change the name of your organization at any time.
+
   </div>
   <div className="md:w-1/2">
     ![Add Organization](../../../img/building-with-settlemint/add-organization.png)
   </div>
 </div>
 
-Enter **billing information**. SettleMint creates a billing account for this
+
+<div className="grid grid-cols-2 gap-4 items-start">
+  {/* Left Column - Text Content */}
+  <div className="flex flex-col justify-start pt-2">
+  <p>Enter **billing information**. SettleMint creates a billing account for this
 organization. You will be billed monthly for the resources you use within this
-organization. Click **Confirm** to go to the organization dashboard. From here,
-you can
-[create your first application](/building-with-settlemint/create-an-application)
-in this organization. The dashboard will show you a summary of your
+organization. Provide your billing details securely via Stripe, with support for Visa, Mastercard, and Amex, to activate your organization. Follow the prompts to complete the setup and gain full access to SettleMint’s blockchain development tools. Ensure all details are accurate to enable a smooth onboarding experience. Your organization is billed monthly, with the invoice dates set for 1st of every month.</p>
+  </div>
+
+  {/* Right Column - Image */}
+  <div>
+    ![SettleMint Signup](../../../img/building-with-settlemint/create-org-billing.png)
+  </div>
+</div>
+
+ Click **Confirm** to go to the organization dashboard. From here,
+you can create your first application in this organization. The dashboard will show you a summary of your
 organization's applications, the members in this organization, and a status of
 the resource costs for the current month.
 
@@ -62,7 +66,7 @@ this organization, with no limitations.
 
 ## Invite new organization members
 
-![Add Members](../../../img/about-settlemint/add-member.png)
+![Invite Members](../../../img/building-with-settlemint/invite-member-to-org.png)
 
 Navigate to the **Members section** of your organization, via the homepage, or
 via your organization dashboard.
@@ -79,8 +83,6 @@ Follow these steps to invite new members to your organization:
 
 ## Manage an organization
 
-![Manage Org](../../../img/building-with-settlemint/organization-manager.png)
-
 Navigate to the **organization dashboard**.
 
 Click **Manage organization** to see the available actions. You can only perform
@@ -88,6 +90,12 @@ these actions if you have administrator rights for this organization.
 
 - **Change name** - Changes the organization name without any further impact.
 - **Delete organization** - Removes the organization from the platform.
+
+On Organization Dashboard
+- See all applications in that organization.
+- See all members of the organization
+- See all the internal applications and clients if in partner mode
+
 
 :::warning Warning
 
@@ -111,7 +119,7 @@ contract sets and any other related blockchain resource.
 
 <Tabs items={['Platform UI', 'SDK CLI', 'SDK JS']}>
   <Tab value="Platform UI">
-    ![Create an App](../../../img/about-settlemint/create-app.png)
+    ![Create an App](../../../img/building-with-settlemint/create-application.png)
 
     <Steps>
       ### Access Application Creation
@@ -187,6 +195,12 @@ contract sets and any other related blockchain resource.
 </Tabs>
 
 ## Manage an application
+
+The SettleMint Platform Dashboard provides a centralized view of blockchain infrastructure, offering real-time insights into system components. With health status indicators, including error and warning counts, it ensures system stability while enabling users to proactively address potential issues. Resource usage tracking helps manage costs efficiently, providing month-to-date expense insights. 
+
+Each component features a “Details” link for quick access to in-depth information, while the intuitive navigation panel allows seamless access to key modules such as Audit Logs, Access Tokens, and Insights. Built-in support options further enhance usability, ensuring users can quickly troubleshoot and resolve issues. 
+
+![Application Dashboard](../../../img/building-with-settlemint/app-dashboard.png)
 
 <Tabs items={['Platform UI', 'SDK CLI', 'SDK JS']}>
   <Tab value="Platform UI">
