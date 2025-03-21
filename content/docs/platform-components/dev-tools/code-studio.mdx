@@ -24,6 +24,8 @@ Currently, we offer the following types of Code Studio:
   compilation and migration scripts that drastically simplify deployment to the
   relevant blockchain.
 
+![Smart Contract IDE](../../../img/building-with-settlemint/code-studio-ide.png)
+
 A Smart Contract Set is a
 [code studio](/building-with-settlemint/dev-tools/code-studio/code-studio) that
 comes with a [smart contract set template](./smart-contract-templates) for your
@@ -34,11 +36,8 @@ You can choose from a wide variety of templates in our open-source
 [template library](smart-contract-templates). Each template includes pre-built
 smart contracts which you can then customize to meet your specific needs.
 
-If you need a fundamental explanation of what smart contracts are and how they
-work, we recommend contacting our team to join our Learn World Blockchain
-course. Our experts will guide you through the basics, ensuring you have a solid
-foundation before diving into development. For a practical guide, please visit
-[deploying a contract](deploying-a-contract).
+![Smart Contract Template](../../../img/building-with-settlemint/add-smart-contract-set.png)
+
 
 ## Overview of the Smart Contract Deployment Process on SettleMint
 
@@ -136,42 +135,43 @@ your deployments.
 
 ## Template library
 
-The programming languages for smart contracts differ depending on the protocol.
-For blockchain networks that are EVM (Ethereum Virtual Machine) compatible, the
-programming language used is Solidity. For Hyperledger Fabric, the programming
-languages used are TypeScript and Go.
 
-- [Empty](https://github.com/settlemint/solidity-empty)
+The programming languages for smart contracts differ depending on the protocol:
 
-- [ERC20 token](https://github.com/settlemint/solidity-token-erc20)
+- For **EVM-compatible networks** (like Ethereum), smart contracts are written in **Solidity**.
+- For **Hyperledger Fabric**, smart contracts (also called chaincode) are written in **TypeScript** or **Go**.
 
-- [ERC1155 token](https://github.com/settlemint/solidity-token-erc1155)
+---
 
-- [ERC20 token with MetaTx](https://github.com/settlemint/solidity-token-erc20-metatx)
+### Solidity Contracts (EVM)
 
-- [Supplychain](https://github.com/settlemint/solidity-supplychain)
+| Template | Description |
+|---------|-------------|
+| [Empty](https://github.com/settlemint/solidity-empty) | A minimal smart contract in Solidity |
+| [ERC20 Token](https://github.com/settlemint/solidity-token-erc20) | Standard ERC20 token implementation |
+| [ERC20 with MetaTx](https://github.com/settlemint/solidity-token-erc20-metatx) | ERC20 token with meta-transaction support |
+| [ERC20 with Crowdsale](https://github.com/settlemint/solidity-token-erc20-crowdsale) | ERC20 token with integrated crowdsale |
+| [ERC1155 Token](https://github.com/settlemint/solidity-token-erc1155) | Multi-token standard (ERC1155) |
+| [ERC721](https://github.com/settlemint/solidity-token-erc721) | Standard NFT token (ERC721) |
+| [ERC721a](https://github.com/settlemint/solidity-token-erc721a) | Gas-optimized NFT (ERC721A) |
+| [ERC721 Generative Art](https://github.com/settlemint/solidity-token-erc721-generative-art) | NFT with generative art logic |
+| [Soulbound Token](https://github.com/settlemint/solidity-token-soulbound) | Non-transferable token |
+| [Supply Chain](https://github.com/settlemint/solidity-supplychain) | Asset tracking across supply chain |
+| [State Machine](https://github.com/settlemint/solidity-statemachine) | State transition logic |
+| [Diamond Bond](https://github.com/settlemint/solidity-diamond-bond) | Bond issuance and tracking |
+| [Attestation Service](https://github.com/settlemint/solidity-attestation-service) | Verifiable claim attestations |
 
-- [Empty typescript](https://github.com/settlemint/chaincode-typescript-empty)
+---
 
-- [Empty typescript with PDC](https://github.com/settlemint/chaincode-typescript-empty-pdc)
+### Chaincode Templates (Hyperledger Fabric)
 
-- [Empty go](https://github.com/settlemint/chaincode-go-empty)
+| Template | Description |
+|---------|-------------|
+| [Empty (TypeScript)](https://github.com/settlemint/chaincode-typescript-empty) | Minimal TypeScript chaincode |
+| [Empty with PDC (TypeScript)](https://github.com/settlemint/chaincode-typescript-empty-pdc) | Chaincode using private data collections |
+| [Empty (Go)](https://github.com/settlemint/chaincode-go-empty) | Minimal Go chaincode |
 
-- [State Machine](https://github.com/settlemint/solidity-statemachine)
-
-- [ERC20 token with crowdsale mechanism](https://github.com/settlemint/solidity-token-erc20-crowdsale)
-
-- [ERC721](https://github.com/settlemint/solidity-token-erc721)
-
-- [ERC721a](https://github.com/settlemint/solidity-token-erc721a)
-
-- [ERC721 Generative Art](https://github.com/settlemint/solidity-token-erc721-generative-art)
-
-- [Soulbound Token](https://github.com/settlemint/solidity-token-soulbound)
-
-- [Diamond bond](https://github.com/settlemint/solidity-diamond-bond)
-
-- [Attestation Service](https://github.com/settlemint/solidity-attestation-service)
+---
 
 ## Create Your Own Smart Contract Templates for Your Consortium
 
