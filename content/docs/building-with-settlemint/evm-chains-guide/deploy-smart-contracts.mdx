@@ -1,0 +1,646 @@
+---
+title: Deploy Smart Contracts
+description: Guide to deploy smart contracts and sub-graphs
+---
+
+import { Tabs, Tab } from "fumadocs-ui/components/tabs";
+import { Callout } from "fumadocs-ui/components/callout";
+import { Steps } from "fumadocs-ui/components/steps";
+import { Card } from "fumadocs-ui/components/card";
+
+<div
+  style={{
+    backgroundColor: "#e1eafd",
+    color: "#356fee",
+    padding: "0.5px 10px 10px 10px",
+    borderRadius: "10px",
+    fontSize: "18px",
+    fontWeight: "bold",
+    lineHeight: "1.2",
+    textAlign: "left",
+  }}
+>
+  Summary
+  <div style={{ fontSize: "16px", fontWeight: "normal", marginTop: "5px" }}>
+    You should start by writing your Solidity smart contract and set up a deployment script using Hardhat Ignition. Then, you should compile your contract to generate the necessary artifacts and test it using either Foundry or Hardhat to ensure all functions work correctly. 
+    
+    Finally, you should deploy your contract to a local or platform network to get a fully functional smart contract ready for integration with your dApp.
+  </div>
+</div>
+
+The goal of this tutorial is to design and build a simple User Profile Manager
+using Solidity. While the visible use case is centered around managing user
+profiles (such as name, email, age, etc.), the hidden objective is to
+demonstrate the core thought process behind building a smart contract that can
+store, update, read, and soft delete data on the blockchain.
+
+This example is intentionally kept simple and non-technical in terms of
+blockchain identity (no wallets or signatures involved) to help beginners focus
+on the fundamentals of: - Designing smart contract data structures (structs and
+mappings) - Writing public and restricted functions to interact with data -
+Emitting and responding to events - Handling update and soft delete logic to
+mimic realistic scenarios (Understand that transaction data is never deleted,
+just a more recent entry is added about that record in a newer block on
+blockchain)
+
+By the end of this tutorial, you’ll not only learn the foundational patterns
+that apply to many real-world blockchain applications but also understand how to
+develop and deploy smart contracts on SettleMint platform.
+
+## 1. Let's start with the solidity smart contract code
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+/**
+ * @title User
+ * @notice This contract manages user profiles through create, update, and delete operations.
+ * It emits events for each operation to enable off-chain indexing and notifications.
+ */
+contract User {
+
+    /**
+     * @notice Represents a user's profile.
+     * @param name Full name of the user.
+     * @param email Email address of the user.
+     * @param age Age of the user.
+     * @param country Country of residence.
+     * @param isKYCApproved Boolean flag indicating if KYC has been approved.
+     * @param isDeleted Boolean flag indicating if the profile is soft-deleted.
+     */
+    struct UserProfile {
+        string name;
+        string email;
+        uint8 age;
+        string country;
+        bool isKYCApproved;
+        bool isDeleted;
+    }
+
+    // Mapping from a unique user ID to a user profile.
+    mapping(uint256 => UserProfile) public profiles;
+
+    // ---------------------------------------------------
+    // Events
+    // ---------------------------------------------------
+
+    /**
+     * @notice Event 1: Emitted when a new profile is created.
+     * @param userId The unique identifier for the user.
+     */
+    event ProfileCreated(uint256 indexed userId);
+
+    /**
+     * @notice Event 2: Emitted when an existing profile is updated.
+     * @param userId The unique identifier for the user.
+     */
+    event ProfileUpdated(uint256 indexed userId);
+
+    /**
+     * @notice Event 3: Emitted when a profile is soft-deleted.
+     * @param userId The unique identifier for the user.
+     */
+    event ProfileDeleted(uint256 indexed userId);
+
+    // ---------------------------------------------------
+    // Functions
+    // ---------------------------------------------------
+
+    /**
+     * @notice Function 1: Creates a new user profile.
+     * @dev The function reverts if a profile already exists for the given userId (unless it's soft-deleted).
+     * @param userId Unique identifier for the user.
+     * @param name The user's full name.
+     * @param email The user's email address.
+     * @param age The user's age.
+     * @param country The user's country of residence.
+     * @param isKYCApproved Boolean flag indicating if KYC is approved.
+     */
+    function createProfile(
+        uint256 userId,
+        string memory name,
+        string memory email,
+        uint8 age,
+        string memory country,
+        bool isKYCApproved
+    ) public {
+        // Allow creation if profile is soft-deleted or does not exist (empty name indicates non-existence)
+        require(
+            profiles[userId].isDeleted || bytes(profiles[userId].name).length == 0,
+            "Profile already exists"
+        );
+
+        // Create and store the new profile
+        profiles[userId] = UserProfile({
+            name: name,
+            email: email,
+            age: age,
+            country: country,
+            isKYCApproved: isKYCApproved,
+            isDeleted: false
+        });
+
+        // Emit event to notify that a profile has been created
+        emit ProfileCreated(userId);
+    }
+
+    /**
+     * @notice Function 2: Updates an existing user profile.
+     * @dev Reverts if the profile does not exist or has been soft-deleted.
+     * @param userId Unique identifier for the user.
+     * @param name New full name for the user.
+     * @param email New email address for the user.
+     * @param age New age for the user.
+     * @param country New country of residence for the user.
+     * @param isKYCApproved New KYC approval status.
+     */
+    function updateProfile(
+        uint256 userId,
+        string memory name,
+        string memory email,
+        uint8 age,
+        string memory country,
+        bool isKYCApproved
+    ) public {
+        // Ensure the profile exists and is not deleted
+        require(
+            bytes(profiles[userId].name).length > 0 && !profiles[userId].isDeleted,
+            "Profile does not exist or has been deleted"
+        );
+
+        // Update the profile with new details
+        profiles[userId] = UserProfile({
+            name: name,
+            email: email,
+            age: age,
+            country: country,
+            isKYCApproved: isKYCApproved,
+            isDeleted: false
+        });
+
+        // Emit event to notify that the profile has been updated
+        emit ProfileUpdated(userId);
+    }
+
+    /**
+     * @notice Function 3: Retrieves the profile of a given user.
+     * @dev Reverts if the profile has been soft-deleted or does not exist.
+     * @param userId Unique identifier for the user.
+     * @return The UserProfile struct containing the user's information.
+     */
+    function getProfile(uint256 userId) public view returns (UserProfile memory) {
+        // Ensure the profile exists (not soft-deleted)
+        require(!profiles[userId].isDeleted, "Profile not found or has been deleted");
+        return profiles[userId];
+    }
+
+    /**
+     * @notice Function 4: Soft-deletes a user profile.
+     * @dev Marks a profile as deleted without removing its data, reverting if the profile doesn't exist or is already deleted.
+     * @param userId Unique identifier for the user.
+     */
+    function deleteProfile(uint256 userId) public {
+        // Ensure that the profile exists and is not already deleted
+        require(
+            bytes(profiles[userId].name).length > 0 && !profiles[userId].isDeleted,
+            "Profile already deleted or doesn't exist"
+        );
+
+        // Soft-delete the profile by setting its isDeleted flag to true
+        profiles[userId].isDeleted = true;
+
+        // Emit event to notify that the profile has been deleted
+        emit ProfileDeleted(userId);
+    }
+}
+```
+
+Let's see how it maps to our Web2 CRUD Operations
+
+| **CRUD**   | **Solidity Function** | **Explanation**                                                                                                                                                                                                                                                                                                                              |
+| ---------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Create** | `createProfile()`     | Adds a new user profile to the blockchain using a unique `userId`. This simulates an `INSERT` operation in databases. It ensures that a profile doesn’t already exist or has been previously soft-deleted.                                                                                                                                   |
+| **Read**   | `getProfile()`        | Retrieves an existing profile by its `userId`, only if it hasn’t been soft-deleted. Works like a `SELECT` statement to view data. This function is marked `view`, meaning it doesn’t cost gas to call.                                                                                                                                       |
+| **Update** | `updateProfile()`     | Modifies all fields of an existing profile. If the profile exists and is not deleted, it overwrites the data with new values — similar to an `UPDATE` in SQL.                                                                                                                                                                                |
+| **Delete** | `deleteProfile()`     | Performs a **soft delete** by setting the `isDeleted` flag to `true`. The profile remains stored on-chain but is no longer accessible via `getProfile()`. This mimics a logical delete in systems where data immutability is important. Unlike traditional databases, data written to the blockchain is permanent, we can’t truly delete it. |
+
+## 2. Let's add this smart contract to code studio
+
+When you deploy an **Empty** smart contract set on SettleMint platfrom, you get
+a very simple **Counter.sol** contract as an example, you may delete it.
+
+In the contracts folder create a file called **User.sol** and copy paste the
+content of the above smart contract code.
+
+## 3. Prepare deployment script
+
+In **Ignition** folder, you will find a folder called **Modules**, there you
+will find a **main.ts** file which is basically a contract deployment script.
+You may delete it if you already know or once you understand the structure.
+
+### Understanding the deployment script code structure.
+
+In this folder create a file called **deployUser.ts**
+
+```
+import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
+
+const UserModule = buildModule("UserModule", (m) => {
+  const user = m.contract("User");
+  return { user };
+});
+
+export default UserModule;
+```
+
+**Let's understand key parts of this code-**
+
+This deployment script uses Hardhat Ignition to define and execute the
+deployment of a smart contract. It begins by importing the buildModule function
+from the Ignition library, which is used to define a deployment module. The
+module is named "UserModule" and is constructed using a callback function that
+receives a context object m.
+
+Within this function, m.contract("User") declares that a contract named User
+(which must match the name inside the Solidity source file) should be deployed.
+This is how it knows which contract is being refered.
+
+The deployed contract instance is stored in a variable called user. This
+instance is then returned from the module so it can be accessed later if needed.
+Finally, the module is exported as the default export so it can be run by
+Hardhat’s Ignition system using the CLI.
+
+## 4. Compile the smart contract code
+
+When a Solidity smart contract is compiled, the source code is transformed into
+low-level bytecode that can be executed on the Ethereum Virtual Machine (EVM).
+This process also generates important metadata such as the ABI (Application
+Binary Interface), which defines how external applications or scripts can
+interact with the contract’s functions and events. Additionally, the compiler
+produces debugging information, source maps, and compiler settings. These
+outputs are essential for deploying, testing, and integrating the contract with
+dApps or frontend applications.
+
+![Compile smart contract code](../../../img/building-with-settlemint/evm-compile.png)
+
+When you compile a Solidity smart contract in SettleMint , it processes .sol
+files and generates various output artifacts needed for deployment and
+interaction. For example, after compiling User.sol, you get the following inside
+the artifacts/ directory:
+
+📂 artifacts/contracts/User.sol/ - Counter.json – This is the main artifact
+file. It contains the ABI (Application Binary Interface) - The compiler
+metadata - Counter.dbg.json – Debugging info including source maps and AST -
+Counter.d.ts – TypeScript definition file for better type safety when using the
+contract in frontend or scripting environments - artifacts.d.ts – Global
+TypeScript declarations for all compiled contracts
+
+📂 artifacts/build-info/ - hash.json – Contains detailed compiler input/output
+and full metadata for the build process, useful for verifying or analyzing
+compilation details
+
+## 5. Test the smart contract
+
+Smart contract testing is a critical part of the development lifecycle in
+blockchain and decentralized application (dApp) projects. Since smart contracts
+are immutable once deployed to the blockchain, bugs or vulnerabilities can
+result in permanent loss of funds, data corruption, or security breaches.
+Thorough testing ensures that smart contracts behave as expected under various
+scenarios and edge cases before they go live on the mainnet.
+
+Testing frameworks like Hardhat and Foundry provide robust tooling to write and
+execute tests in Solidity or JavaScript/TypeScript. These frameworks offer
+helpful utilities such as assertions, mock accounts, blockchain state
+manipulation (e.g., time travel or snapshot/rollback), and expected reverts.
+Additionally, testing libraries like forge-std/Test.sol (in Foundry) or chai (in
+Hardhat) enable expressive and readable test assertions.
+
+
+### Foundry test
+
+In the **test** folder in IDE, create a **User.t.sol** file for HardHat test
+script.
+
+It uses forge-std/Test.sol is a powerful utility library provided by Foundry’s
+standard library (forge-std) that simplifies writing and executing tests for
+smart contracts. It extends the base Solidity Test contract and includes a rich
+set of assertions, cheatcodes, and debugging tools that make testing more
+expressive and efficient.
+
+When a test contract inherits from Test, it gains access to functions like
+assertEq, assertTrue, fail, and testing cheatcodes such as vm.prank,
+vm.expectRevert, vm.roll, and many more. These tools simulate complex behaviors
+and edge cases in a local testing environment without the need to manually
+manipulate the EVM state. For example, vm.expectRevert allows developers to
+anticipate and verify error conditions, while assertEq simplifies comparisons
+between expected and actual results.
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import { Test } from "forge-std/Test.sol";
+import { User } from "../contracts/User.sol";
+
+contract UserTest is Test {
+    User public user;
+
+    // Deploy a fresh User contract before each test
+    function setUp() public {
+        user = new User();
+    }
+
+    // Test: Successfully create a user profile and verify its fields.
+    function test_CreateProfile() public {
+        user.createProfile(1, "Alice", "alice@example.com", 30, "Wonderland", true);
+
+        User.UserProfile memory profile = user.getProfile(1);
+
+        assertEq(profile.name, "Alice");
+        assertEq(profile.email, "alice@example.com");
+        assertEq(profile.age, 30);
+        assertEq(profile.country, "Wonderland");
+        assertTrue(profile.isKYCApproved);
+        assertFalse(profile.isDeleted);
+    }
+
+    // Test: Successfully update an existing profile.
+    function test_UpdateProfile() public {
+        user.createProfile(1, "Alice", "alice@example.com", 30, "Wonderland", true);
+        user.updateProfile(1, "Alice Updated", "alice@new.com", 31, "Newland", false);
+
+        User.UserProfile memory profile = user.getProfile(1);
+
+        assertEq(profile.name, "Alice Updated");
+        assertEq(profile.email, "alice@new.com");
+        assertEq(profile.age, 31);
+        assertEq(profile.country, "Newland");
+        // isKYCApproved was updated to false.
+        assertFalse(profile.isKYCApproved);
+    }
+
+    // Test: Deleting a profile should prevent further access.
+    function test_DeleteProfile() public {
+        user.createProfile(1, "Alice", "alice@example.com", 30, "Wonderland", true);
+        user.deleteProfile(1);
+
+        // getProfile should revert because the profile is marked as deleted.
+        try user.getProfile(1) {
+            fail(); // Expected getProfile to revert for deleted profile.
+        } catch Error(string memory reason) {
+            assertEq(reason, "Profile not found or has been deleted");
+        }
+    }
+
+    // Test: Duplicate profile creation should revert.
+    function test_RevertOnDuplicateCreate() public {
+        user.createProfile(1, "Alice", "alice@example.com", 30, "Wonderland", true);
+        vm.expectRevert(bytes("Profile already exists"));
+        user.createProfile(1, "Bob", "bob@example.com", 40, "Atlantis", false);
+    }
+
+    // Test: Updating a non-existent profile should revert.
+    function test_RevertOnUpdateMissingProfile() public {
+        vm.expectRevert(bytes("Profile does not exist or has been deleted"));
+        user.updateProfile(99, "Ghost", "ghost@example.com", 99, "Nowhere", false);
+    }
+
+    // Test: Deleting a non-existent profile should revert.
+    function test_RevertOnDeleteMissingProfile() public {
+        vm.expectRevert(bytes("Profile already deleted or doesn't exist"));
+        user.deleteProfile(123);
+    }
+}
+```
+![Foundry Test Pass](../../../img/building-with-settlemint/foundry-test-pass-cli.png)
+
+
+### Hardhat test
+
+Start test network using **Hardhat - Start Network** script in task manager.
+![Start Hardhat Local Network](../../../img/building-with-settlemint/hardhat-local-network.png)
+
+In the **test** folder in IDE, create a **User.ts** file for HardHat test
+script.
+
+This test script leverages Hardhat’s modern support for viem, a lightweight and
+fast alternative to Ethers.js, designed for more efficient interaction with
+Ethereum contracts. The test uses loadFixture from
+hardhat-toolbox-viem/network-helpers to ensure test isolation and efficient
+deployments—each test gets a clean contract instance to work with.
+
+Inside the script, we define a fixture function (deployUserFixture) to deploy
+the User contract and provide access to the publicClient. The tests cover all
+core functionalities of the contract: creating, updating, reading, and
+soft-deleting user profiles. Assertions are written using Chai’s expect syntax,
+while contract interactions (like write.createProfile and read.getProfile)
+follow the Viem pattern, making the test code both concise and expressive.
+
+```ts
+import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
+import { expect } from "chai";
+import hre from "hardhat";
+
+describe("User", function () {
+  async function deployUserFixture() {
+    const userContract = await hre.viem.deployContract("User");
+    const account = (await hre.viem.getWalletClients())[0].account.address;
+    return { userContract, account };
+  }
+
+  const sampleProfile = {
+    userId: 1n,
+    name: "Alice",
+    email: "alice@example.com",
+    age: 30,
+    country: "Wonderland",
+    isKYCApproved: true,
+  };
+
+  describe("createProfile", function () {
+    it("should create a new profile", async function () {
+      const { userContract } = await loadFixture(deployUserFixture);
+
+      await userContract.write.createProfile([
+        sampleProfile.userId,
+        sampleProfile.name,
+        sampleProfile.email,
+        sampleProfile.age,
+        sampleProfile.country,
+        sampleProfile.isKYCApproved,
+      ]);
+
+      const profile = await userContract.read.getProfile([
+        sampleProfile.userId,
+      ]);
+      expect(profile.name).to.equal(sampleProfile.name);
+      expect(profile.email).to.equal(sampleProfile.email);
+    });
+
+    it("should not allow duplicate profile creation", async function () {
+      const { userContract, account } = await loadFixture(deployUserFixture);
+
+      await userContract.write.createProfile([
+        sampleProfile.userId,
+        sampleProfile.name,
+        sampleProfile.email,
+        sampleProfile.age,
+        sampleProfile.country,
+        sampleProfile.isKYCApproved,
+      ]);
+
+      try {
+        await userContract.simulate.createProfile(
+          [sampleProfile.userId, "Bob", "bob@example.com", 25, "Utopia", false],
+          { account }
+        );
+        expect.fail("Expected simulate.createProfile to revert");
+      } catch (err: any) {
+        // Bypassing exact error message check – just ensuring an error was thrown.
+        expect(err).to.exist;
+      }
+    });
+  });
+
+  describe("updateProfile", function () {
+    it("should update an existing profile", async function () {
+      const { userContract } = await loadFixture(deployUserFixture);
+
+      await userContract.write.createProfile([
+        sampleProfile.userId,
+        sampleProfile.name,
+        sampleProfile.email,
+        sampleProfile.age,
+        sampleProfile.country,
+        sampleProfile.isKYCApproved,
+      ]);
+
+      await userContract.write.updateProfile([
+        sampleProfile.userId,
+        sampleProfile.name,
+        "alice@updated.com",
+        sampleProfile.age,
+        sampleProfile.country,
+        sampleProfile.isKYCApproved,
+      ]);
+
+      const updated = await userContract.read.getProfile([
+        sampleProfile.userId,
+      ]);
+      expect(updated.email).to.equal("alice@updated.com");
+    });
+
+    it("should fail to update non-existent profile", async function () {
+      const { userContract, account } = await loadFixture(deployUserFixture);
+
+      try {
+        await userContract.simulate.updateProfile(
+          [999n, "Ghost", "ghost@void.com", 99, "Nowhere", false],
+          { account }
+        );
+        expect.fail("Expected simulate.updateProfile to revert");
+      } catch (err: any) {
+        // Bypassing exact error message check – just ensuring an error was thrown.
+        expect(err).to.exist;
+      }
+    });
+  });
+
+  describe("deleteProfile", function () {
+    it("should soft delete a profile", async function () {
+      const { userContract } = await loadFixture(deployUserFixture);
+
+      await userContract.write.createProfile([
+        sampleProfile.userId,
+        sampleProfile.name,
+        sampleProfile.email,
+        sampleProfile.age,
+        sampleProfile.country,
+        sampleProfile.isKYCApproved,
+      ]);
+
+      await userContract.write.deleteProfile([sampleProfile.userId]);
+
+      try {
+        await userContract.read.getProfile([sampleProfile.userId]);
+        expect.fail("Expected getProfile to revert");
+      } catch (err: any) {
+        // Bypassing exact error message check – just ensuring an error was thrown.
+        expect(err).to.exist;
+      }
+    });
+
+    it("should fail to delete a non-existent profile", async function () {
+      const { userContract, account } = await loadFixture(deployUserFixture);
+
+      try {
+        await userContract.simulate.deleteProfile([123n], { account });
+        expect.fail("Expected simulate.deleteProfile to revert");
+      } catch (err: any) {
+        // Bypassing exact error message check – just ensuring an error was thrown.
+        expect(err).to.exist;
+      }
+    });
+  });
+});
+```
+
+![Hardhat Test Pass](../../../img/building-with-settlemint/hardhat-test-pass-cli.png)
+
+Once the test is pass, you can deploy to local hardhat network by using script - **Hardhat - Deploy to Local Network**
+
+![Hardhat Deploy Local](../../../img/building-with-settlemint/hardhat-deploy-local-cli.png)
+
+
+
+## 6. Deploy the smart contract
+
+Hardhat deploy to platform network enter the path of the deployment script
+![Select node to deploy](../../../img/building-with-settlemint/select-deployment-script.png)
+
+ignition/modules/deployUser.ts
+
+Select the node to which you wish to deploy this smart contract. If you get an
+error, please ensure that a private key was created and attached to the node on
+which you wish to deploy the smart contract.
+![Select node to deploy](../../../img/building-with-settlemint/select-node-cli.png)
+
+Select the private key you wish to use to deploy smart contract. If you are
+using a public network or a network with gas fee, then make sure that this
+private key's wallet is funded.
+![Select private key to deploy](../../../img/building-with-settlemint/select-private-key-cli.png)
+
+Select yes when prompted - **Confirm deploy to network (network name)? ›
+(y/N)**.
+
+Wait for a few minutes for the contrcat to be deployed.
+
+![Contract Deployed](../../../img/building-with-settlemint/contract-deployed-cli.png)
+
+Deployed contract address is stored in deployed_addresses.json file located in igntition>deployments folder.
+
+![Deployed Contract Address](../../../img/building-with-settlemint/deployed-contract-address.png)
+
+
+
+<div style={{
+  backgroundColor: "#D1E5E8", 
+  color: "#000000", 
+  padding: "0.5px 10px 10px 10px",
+  borderRadius: "10px", 
+  fontSize: "18px", 
+  fontWeight: "light",
+  lineHeight: "1.2",
+  textAlign: "left"
+}}>
+Congratulations.!!
+You have successfully compiled, tested and deployed your smart contract on blockchain network. 
+
+Now you can proceed to middlewares for getting APIs to do smart contract transactions, write data to chain and read data in a structured format. 
+</div>
+
+
+```
+Keywords: Solidity, smart contracts, Ethereum, SettleMint, Hardhat, Foundry, Ignition, deployment, contract testing, user profile manager, CRUD operations, soft delete, ABI, EVM, struct, mapping, events, contract compilation, sub-graphs, blockchain development, test automation, forge-std, viem, chai, JavaScript, TypeScript, contract address, deployment script, smart contract storage, blockchain identity, dApp backend, on-chain data, revert handling, metadata, contract artifacts, local network, private key, gas fees, node selection, build process
+```

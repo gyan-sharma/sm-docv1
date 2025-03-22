@@ -7,7 +7,8 @@
   "create-an-organization-and-application",
   "add-network-nodes-and-explorer",
   "add-private-keys-and-user-wallets",
-  "setup-code-studio-deploy-smart-contracts",
+  "setup-code-studio",
+  "deploy-smart-contracts",
   "setup-graph-middleware-and-api-portal",
   "setup-storage-and-offchain-database",
   "deploy-frontend-or-custom-services"
