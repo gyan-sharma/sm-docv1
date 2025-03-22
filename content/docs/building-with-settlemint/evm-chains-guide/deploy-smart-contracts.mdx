@@ -238,10 +238,9 @@ content of the above smart contract code.
 In **Ignition** folder, you will find a folder called **Modules**, there you
 will find a **main.ts** file which is basically a contract deployment script.
 You may delete it if you already know or once you understand the structure.
+In this folder create a file called **deployUser.ts**
 
 ### Understanding the deployment script code structure.
-
-In this folder create a file called **deployUser.ts**
 
 ```
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
@@ -289,16 +288,14 @@ files and generates various output artifacts needed for deployment and
 interaction. For example, after compiling User.sol, you get the following inside
 the artifacts/ directory:
 
-📂 artifacts/contracts/User.sol/ - Counter.json – This is the main artifact
-file. It contains the ABI (Application Binary Interface) - The compiler
-metadata - Counter.dbg.json – Debugging info including source maps and AST -
-Counter.d.ts – TypeScript definition file for better type safety when using the
-contract in frontend or scripting environments - artifacts.d.ts – Global
-TypeScript declarations for all compiled contracts
+📂 artifacts/contracts/User.sol/ 
+- Counter.json – This is the main artifact file. It contains the ABI (Application Binary Interface) - The compiler metadata 
+- Counter.dbg.json – Debugging info including source maps and AST 
+- Counter.d.ts – TypeScript definition file for better type safety when using the contract in frontend or scripting environments 
+- artifacts.d.ts – Global TypeScript declarations for all compiled contracts
 
-📂 artifacts/build-info/ - hash.json – Contains detailed compiler input/output
-and full metadata for the build process, useful for verifying or analyzing
-compilation details
+📂 artifacts/build-info/ 
+- hash.json – Contains detailed compiler input/output and full metadata for the build process, useful for verifying or analyzing compilation details
 
 ## 5. Test the smart contract
 
