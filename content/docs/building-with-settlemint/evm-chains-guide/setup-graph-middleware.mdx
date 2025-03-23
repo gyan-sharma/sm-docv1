@@ -10,17 +10,16 @@ import { Card } from "fumadocs-ui/components/card";
 
 ## How to setup Graph Middleware and API Portal in SettleMint platform
 
-
 Middleware acts as a bridge between your blockchain network and applications,
 providing essential services like data indexing, API access, and event
 monitoring. Before adding middleware, ensure you have an application and
 blockchain node in place.
 
-
-
 ## How to Add Middleware
 
-<Tabs items={['Platform UI', 'SDK CLI', 'SDK JS']}>
+![Add Graph Middleware](../../../img/building-with-settlemint/add-graph-middleware.png)
+
+<Tabs items={['SDK CLI', 'Platform UI', 'SDK JS']}>
   <Tab value="Platform UI">
     <Steps>
       ### Navigate to Application
@@ -93,7 +92,7 @@ blockchain node in place.
 
 ## Manage Middleware
 
-<Tabs items={['Platform UI', 'SDK CLI', 'SDK JS']}>
+<Tabs items={['SDK CLI', 'Platform UI', 'SDK JS']}>
   <Tab value="Platform UI">
     Navigate to your middleware and click **Manage middleware** to:
     - View middleware details and status
@@ -130,6 +129,195 @@ blockchain node in place.
 
   </Tab>
 </Tabs>
+
+
+## 1. Collect constants needed
+
+Find the chain ID of the network from Blockchain Networks > Selcted Network > Details page, it will be something like **47440**
+Locate the contract address, deployed contract address is stored in deployed_addresses.json file located in igntition>deployments folder.
+
+
+## 2. Building subgraph.config.json file
+
+```json
+{
+  "output": "generated/scs.",
+  "chain": "47440",
+  "datasources": [
+    {
+      "name": "User",
+      "address": "0xd8C9C4Fc1F71869D54fAF8df6b1C5F7421a1e15b",
+      "startBlock": 0,
+      "module": ["user"]
+    }
+  ]
+}
+```
+
+## 3 Create user.yaml file inside subgraph/datasources/user.yaml 
+
+```yaml
+
+- kind: ethereum/contract
+  name: User
+  network: chain47440
+  source:
+    address: "0xd8C9C4Fc1F71869D54fAF8df6b1C5F7421a1e15b"
+    abi: User
+    startBlock: 0
+  mapping:
+    kind: ethereum/events
+    apiVersion: 0.0.5
+    language: wasm/assemblyscript
+    entities:
+      - UserProfile
+    abis:
+      - name: User
+        file: "{root}/out/User.sol/User.json"
+    eventHandlers:
+      - event: ProfileCreated(indexed uint256)
+        handler: handleProfileCreated
+      - event: ProfileUpdated(indexed uint256)
+        handler: handleProfileUpdated
+      - event: ProfileDeleted(indexed uint256)
+        handler: handleProfileDeleted
+    file: ./user.ts
+
+```
+
+
+## 4. Create user.gql.json, This defines your GraphQL schema (save as subgraph/datasources/user.gql.json):
+
+```
+[
+  {
+    "name": "UserProfile",
+    "fields": [
+      { "name": "id", "type": "ID!" },
+      { "name": "name", "type": "String!" },
+      { "name": "email", "type": "String!" },
+      { "name": "age", "type": "Int!" },
+      { "name": "country", "type": "String!" },
+      { "name": "isKYCApproved", "type": "Boolean!" },
+      { "name": "isDeleted", "type": "Boolean!" },
+      { "name": "createdAt", "type": "BigInt" },
+      { "name": "updatedAt", "type": "BigInt" }
+    ]
+  }
+]
+```
+
+## 5. user.ts (event handlers) Create subgraph/datasources/user.ts:
+
+```ts
+import { BigInt } from "@graphprotocol/graph-ts"
+import {
+  ProfileCreated,
+  ProfileUpdated,
+  ProfileDeleted
+} from "../../generated/User/User"
+import { UserProfile } from "../../generated/schema"
+
+export function handleProfileCreated(event: ProfileCreated): void {
+  const id = event.params.userId.toString()
+  let user = new UserProfile(id)
+
+  user.name = ""
+  user.email = ""
+  user.age = 0
+  user.country = ""
+  user.isKYCApproved = false
+  user.isDeleted = false
+  user.createdAt = event.block.timestamp
+  user.updatedAt = event.block.timestamp
+
+  user.save()
+}
+
+export function handleProfileUpdated(event: ProfileUpdated): void {
+  const id = event.params.userId.toString()
+  let user = UserProfile.load(id)
+
+  if (user == null) {
+    user = new UserProfile(id)
+    user.createdAt = event.block.timestamp
+  }
+
+  // Keep existing values until full field update data is included in event
+  user.updatedAt = event.block.timestamp
+  user.save()
+}
+
+export function handleProfileDeleted(event: ProfileDeleted): void {
+  const id = event.params.userId.toString()
+  let user = UserProfile.load(id)
+
+  if (user) {
+    user.isDeleted = true
+    user.updatedAt = event.block.timestamp
+    user.save()
+  }
+}
+```
+
+## 6. create subgraph.yaml in the root directory 
+
+```yaml
+specVersion: 0.0.5
+description: Tracks user profiles (create, update, delete)
+repository: https://github.com/your-org/your-repo
+schema:
+  file: ./generated/user.schema.graphql
+
+dataSources:
+  - kind: ethereum/contract
+    name: User
+    network: chain47440
+    source:
+      address: "0xd8C9C4Fc1F71869D54fAF8df6b1C5F7421a1e15b"
+      abi: User
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - UserProfile
+      abis:
+        - name: User
+          file: ./out/User.sol/User.json
+      eventHandlers:
+        - event: ProfileCreated(indexed uint256)
+          handler: handleProfileCreated
+        - event: ProfileUpdated(indexed uint256)
+          handler: handleProfileUpdated
+        - event: ProfileDeleted(indexed uint256)
+          handler: handleProfileDeleted
+      file: ./subgraph/datasources/user.ts
+
+```
+
+
+Run Codegen script
+Run Graph Build script
+Run Graph deploy script
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## The Graph Middleware
 
