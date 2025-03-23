@@ -60,8 +60,12 @@ pragma solidity ^0.8.24;
  */
 contract User {
 
+    // ===================================================
+    // Section 1: Structs
+    // ===================================================
+
     /**
-     * @notice Represents a user's profile.
+     * @notice Struct 1.1: Represents a user's profile.
      * @param name Full name of the user.
      * @param email Email address of the user.
      * @param age Age of the user.
@@ -78,37 +82,69 @@ contract User {
         bool isDeleted;
     }
 
-    // Mapping from a unique user ID to a user profile.
+    // ===================================================
+    // Section 2: Storage
+    // ===================================================
+
+    /**
+     * @notice Storage 2.1: Mapping from a unique user ID to a user profile.
+     */
     mapping(uint256 => UserProfile) public profiles;
 
-    // ---------------------------------------------------
-    // Events
-    // ---------------------------------------------------
+    // ===================================================
+    // Section 3: Events
+    // ===================================================
 
     /**
-     * @notice Event 1: Emitted when a new profile is created.
+     * @notice Event 3.1: Emitted when a new profile is created.
+     * @dev Emits full profile details for indexing by off-chain systems.
      * @param userId The unique identifier for the user.
+     * @param name The user's full name.
+     * @param email The user's email address.
+     * @param age The user's age.
+     * @param country The user's country of residence.
+     * @param isKYCApproved Whether the user is KYC approved.
      */
-    event ProfileCreated(uint256 indexed userId);
+    event ProfileCreated(
+        uint256 indexed userId,
+        string name,
+        string email,
+        uint8 age,
+        string country,
+        bool isKYCApproved
+    );
 
     /**
-     * @notice Event 2: Emitted when an existing profile is updated.
+     * @notice Event 3.2: Emitted when an existing profile is updated.
+     * @dev Emits updated profile details for indexing by off-chain systems.
      * @param userId The unique identifier for the user.
+     * @param name The updated full name.
+     * @param email The updated email address.
+     * @param age The updated age.
+     * @param country The updated country.
+     * @param isKYCApproved The updated KYC approval status.
      */
-    event ProfileUpdated(uint256 indexed userId);
+    event ProfileUpdated(
+        uint256 indexed userId,
+        string name,
+        string email,
+        uint8 age,
+        string country,
+        bool isKYCApproved
+    );
 
     /**
-     * @notice Event 3: Emitted when a profile is soft-deleted.
+     * @notice Event 3.3: Emitted when a profile is soft-deleted.
      * @param userId The unique identifier for the user.
      */
     event ProfileDeleted(uint256 indexed userId);
 
-    // ---------------------------------------------------
-    // Functions
-    // ---------------------------------------------------
+    // ===================================================
+    // Section 4: Functions
+    // ===================================================
 
     /**
-     * @notice Function 1: Creates a new user profile.
+     * @notice Function 4.1: Creates a new user profile.
      * @dev The function reverts if a profile already exists for the given userId (unless it's soft-deleted).
      * @param userId Unique identifier for the user.
      * @param name The user's full name.
@@ -125,13 +161,13 @@ contract User {
         string memory country,
         bool isKYCApproved
     ) public {
-        // Allow creation if profile is soft-deleted or does not exist (empty name indicates non-existence)
+        // 4.1.1 Allow creation if profile is soft-deleted or does not exist (empty name indicates non-existence)
         require(
             profiles[userId].isDeleted || bytes(profiles[userId].name).length == 0,
             "Profile already exists"
         );
 
-        // Create and store the new profile
+        // 4.1.2 Create and store the new profile
         profiles[userId] = UserProfile({
             name: name,
             email: email,
@@ -141,12 +177,12 @@ contract User {
             isDeleted: false
         });
 
-        // Emit event to notify that a profile has been created
-        emit ProfileCreated(userId);
+        // 4.1.3 Emit full profile data so off-chain indexers like The Graph can index it
+        emit ProfileCreated(userId, name, email, age, country, isKYCApproved);
     }
 
     /**
-     * @notice Function 2: Updates an existing user profile.
+     * @notice Function 4.2: Updates an existing user profile.
      * @dev Reverts if the profile does not exist or has been soft-deleted.
      * @param userId Unique identifier for the user.
      * @param name New full name for the user.
@@ -163,13 +199,13 @@ contract User {
         string memory country,
         bool isKYCApproved
     ) public {
-        // Ensure the profile exists and is not deleted
+        // 4.2.1 Ensure the profile exists and is not deleted
         require(
             bytes(profiles[userId].name).length > 0 && !profiles[userId].isDeleted,
             "Profile does not exist or has been deleted"
         );
 
-        // Update the profile with new details
+        // 4.2.2 Update the profile with new details
         profiles[userId] = UserProfile({
             name: name,
             email: email,
@@ -179,51 +215,73 @@ contract User {
             isDeleted: false
         });
 
-        // Emit event to notify that the profile has been updated
-        emit ProfileUpdated(userId);
+        // 4.2.3 Emit updated full profile data so subgraph can index changes
+        emit ProfileUpdated(userId, name, email, age, country, isKYCApproved);
     }
 
     /**
-     * @notice Function 3: Retrieves the profile of a given user.
+     * @notice Function 4.3: Retrieves the profile of a given user.
      * @dev Reverts if the profile has been soft-deleted or does not exist.
      * @param userId Unique identifier for the user.
      * @return The UserProfile struct containing the user's information.
      */
     function getProfile(uint256 userId) public view returns (UserProfile memory) {
-        // Ensure the profile exists (not soft-deleted)
+        // 4.3.1 Ensure the profile exists (not soft-deleted)
         require(!profiles[userId].isDeleted, "Profile not found or has been deleted");
         return profiles[userId];
     }
 
     /**
-     * @notice Function 4: Soft-deletes a user profile.
+     * @notice Function 4.4: Soft-deletes a user profile.
      * @dev Marks a profile as deleted without removing its data, reverting if the profile doesn't exist or is already deleted.
      * @param userId Unique identifier for the user.
      */
     function deleteProfile(uint256 userId) public {
-        // Ensure that the profile exists and is not already deleted
+        // 4.4.1 Ensure that the profile exists and is not already deleted
         require(
             bytes(profiles[userId].name).length > 0 && !profiles[userId].isDeleted,
             "Profile already deleted or doesn't exist"
         );
 
-        // Soft-delete the profile by setting its isDeleted flag to true
+        // 4.4.2 Soft-delete the profile by setting its isDeleted flag to true
         profiles[userId].isDeleted = true;
 
-        // Emit event to notify that the profile has been deleted
+        // 4.4.3 Emit event to notify that the profile has been deleted
         emit ProfileDeleted(userId);
     }
 }
 ```
+Please ensure that smart contract emits all required paramters in every event, otherwise, while indeing we will not get the parameters which are not emited. 
 
-Let's see how it maps to our Web2 CRUD Operations
 
-| **CRUD**   | **Solidity Function** | **Explanation**                                                                                                                                                                                                                                                                                                                              |
-| ---------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Create** | `createProfile()`     | Adds a new user profile to the blockchain using a unique `userId`. This simulates an `INSERT` operation in databases. It ensures that a profile doesn’t already exist or has been previously soft-deleted.                                                                                                                                   |
-| **Read**   | `getProfile()`        | Retrieves an existing profile by its `userId`, only if it hasn’t been soft-deleted. Works like a `SELECT` statement to view data. This function is marked `view`, meaning it doesn’t cost gas to call.                                                                                                                                       |
-| **Update** | `updateProfile()`     | Modifies all fields of an existing profile. If the profile exists and is not deleted, it overwrites the data with new values — similar to an `UPDATE` in SQL.                                                                                                                                                                                |
-| **Delete** | `deleteProfile()`     | Performs a **soft delete** by setting the `isDeleted` flag to `true`. The profile remains stored on-chain but is no longer accessible via `getProfile()`. This mimics a logical delete in systems where data immutability is important. Unlike traditional databases, data written to the blockchain is permanent, we can’t truly delete it. |
+## Smart Contract — Events & Functions Overview
+
+| #   | Events           | Parameters                                                                                                     | Description                                |
+|-----|------------------|----------------------------------------------------------------------------------------------------------------|--------------------------------------------|
+| 3.1 | `ProfileCreated` | `uint256 userId`, `string name`, `string email`, `uint8 age`, `string country`, `bool isKYCApproved`          | Emitted when a new profile is created      |
+| 3.2 | `ProfileUpdated` | `uint256 userId`, `string name`, `string email`, `uint8 age`, `string country`, `bool isKYCApproved`          | Emitted when a profile is updated          |
+| 3.3 | `ProfileDeleted` | `uint256 userId`                                                                                               | Emitted when a profile is soft-deleted     |
+
+
+| #   | Functions            | Parameters                                                                                                     | Returns                | Description                                 |
+|-----|------------------|----------------------------------------------------------------------------------------------------------------|------------------------|---------------------------------------------|
+| 4.1 | `createProfile`  | `uint256 userId`, `string name`, `string email`, `uint8 age`, `string country`, `bool isKYCApproved`          | –                      | Creates a new user profile                  |
+| 4.2 | `updateProfile`  | `uint256 userId`, `string name`, `string email`, `uint8 age`, `string country`, `bool isKYCApproved`          | –                      | Updates an existing profile                 |
+| 4.3 | `getProfile`     | `uint256 userId`                                                                                               | `UserProfile memory`    | Retrieves the profile if not soft-deleted   |
+| 4.4 | `deleteProfile`  | `uint256 userId`                                                                                               | –                      | Soft-deletes the profile                    |
+
+
+## CRUD Mapping for the Smart Contract
+
+This table maps traditional Web2-style CRUD operations to the equivalent Solidity functions in the smart contract:
+
+| **CRUD**   | **Solidity Function** | **Explanation**                                                                                                                                                                                                                                                                                                                                 |
+|------------|------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Create** | `createProfile()`      | Adds a new user profile to the blockchain using a unique `userId`. This simulates an `INSERT` operation in databases. It checks that the profile does not already exist (unless soft-deleted) and stores the user's details. Emits `ProfileCreated` with full data for off-chain indexing.                                                   |
+| **Read**   | `getProfile()`         | Retrieves an existing profile by its `userId` — similar to a `SELECT` query in SQL. It returns the user's profile only if it hasn’t been soft-deleted. This function is marked `view`, meaning it does not modify blockchain state and can be called without gas.                                                                          |
+| **Update** | `updateProfile()`      | Modifies all fields of an existing user profile. Acts like an `UPDATE` in Web2 databases. It ensures the profile exists and is not deleted, then updates it with the provided values. Emits `ProfileUpdated` with full details for off-chain use.                                                                                            |
+| **Delete** | `deleteProfile()`      | Performs a **soft delete** by setting the `isDeleted` flag to `true`, without removing the actual data from storage. This is similar to a logical delete used in many enterprise databases. The data remains on-chain (for auditability), but `getProfile()` will no longer return it. Emits `ProfileDeleted`.                              |
+
 
 ## 2. Let's add this smart contract to code studio
 
@@ -242,7 +300,7 @@ In this folder create a file called **deployUser.ts**
 
 ### Understanding the deployment script code structure.
 
-```
+```ts
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
 const UserModule = buildModule("UserModule", (m) => {
@@ -334,79 +392,112 @@ anticipate and verify error conditions, while assertEq simplifies comparisons
 between expected and actual results.
 
 ```solidity
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
 
-import { Test } from "forge-std/Test.sol";
-import { User } from "../contracts/User.sol";
+import "forge-std/Test.sol";
+import "../contracts/User.sol"; // Adjust if your contract is in a different folder
 
 contract UserTest is Test {
     User public user;
 
-    // Deploy a fresh User contract before each test
     function setUp() public {
+        // Deploy the contract before each test
         user = new User();
     }
 
-    // Test: Successfully create a user profile and verify its fields.
-    function test_CreateProfile() public {
-        user.createProfile(1, "Alice", "alice@example.com", 30, "Wonderland", true);
+    function testCreateProfile() public {
+        // Call createProfile
+        user.createProfile(1, "Alice", "alice@email.com", 30, "USA", true);
 
+        // Fetch the profile struct
         User.UserProfile memory profile = user.getProfile(1);
 
+        // Assert values match what we set
         assertEq(profile.name, "Alice");
-        assertEq(profile.email, "alice@example.com");
+        assertEq(profile.email, "alice@email.com");
         assertEq(profile.age, 30);
-        assertEq(profile.country, "Wonderland");
-        assertTrue(profile.isKYCApproved);
-        assertFalse(profile.isDeleted);
+        assertEq(profile.country, "USA");
+        assertEq(profile.isKYCApproved, true);
+        assertEq(profile.isDeleted, false);
     }
 
-    // Test: Successfully update an existing profile.
-    function test_UpdateProfile() public {
-        user.createProfile(1, "Alice", "alice@example.com", 30, "Wonderland", true);
-        user.updateProfile(1, "Alice Updated", "alice@new.com", 31, "Newland", false);
+    function testUpdateProfile() public {
+        // First create a profile
+        user.createProfile(2, "Bob", "bob@email.com", 28, "UK", false);
 
-        User.UserProfile memory profile = user.getProfile(1);
+        // Update profile with new values
+        user.updateProfile(2, "Bob Updated", "bob@new.com", 29, "Canada", true);
 
-        assertEq(profile.name, "Alice Updated");
-        assertEq(profile.email, "alice@new.com");
-        assertEq(profile.age, 31);
-        assertEq(profile.country, "Newland");
-        // isKYCApproved was updated to false.
-        assertFalse(profile.isKYCApproved);
+        // Fetch the updated profile
+        User.UserProfile memory profile = user.getProfile(2);
+
+        // Assert updated values
+        assertEq(profile.name, "Bob Updated");
+        assertEq(profile.email, "bob@new.com");
+        assertEq(profile.age, 29);
+        assertEq(profile.country, "Canada");
+        assertEq(profile.isKYCApproved, true);
+        assertEq(profile.isDeleted, false);
     }
 
-    // Test: Deleting a profile should prevent further access.
-    function test_DeleteProfile() public {
-        user.createProfile(1, "Alice", "alice@example.com", 30, "Wonderland", true);
-        user.deleteProfile(1);
+    function testDeleteProfile() public {
+        // Create and delete a profile
+        user.createProfile(3, "Charlie", "charlie@email.com", 25, "Germany", true);
+        user.deleteProfile(3);
 
-        // getProfile should revert because the profile is marked as deleted.
-        try user.getProfile(1) {
-            fail(); // Expected getProfile to revert for deleted profile.
-        } catch Error(string memory reason) {
-            assertEq(reason, "Profile not found or has been deleted");
-        }
+        // Expect revert on reading a deleted profile
+        vm.expectRevert("Profile not found or has been deleted");
+        user.getProfile(3);
     }
 
-    // Test: Duplicate profile creation should revert.
-    function test_RevertOnDuplicateCreate() public {
-        user.createProfile(1, "Alice", "alice@example.com", 30, "Wonderland", true);
-        vm.expectRevert(bytes("Profile already exists"));
-        user.createProfile(1, "Bob", "bob@example.com", 40, "Atlantis", false);
+    function testCannotCreateDuplicateProfile() public {
+        // Create the profile
+        user.createProfile(4, "Dan", "dan@email.com", 35, "India", false);
+
+        // Attempt to create with the same ID again should revert
+        vm.expectRevert("Profile already exists");
+        user.createProfile(4, "DanAgain", "dan@retry.com", 36, "India", true);
     }
 
-    // Test: Updating a non-existent profile should revert.
-    function test_RevertOnUpdateMissingProfile() public {
-        vm.expectRevert(bytes("Profile does not exist or has been deleted"));
-        user.updateProfile(99, "Ghost", "ghost@example.com", 99, "Nowhere", false);
+    function testCannotUpdateNonexistentProfile() public {
+        // Try to update a profile that was never created
+        vm.expectRevert("Profile does not exist or has been deleted");
+        user.updateProfile(5, "Eve", "eve@email.com", 31, "Brazil", true);
     }
 
-    // Test: Deleting a non-existent profile should revert.
-    function test_RevertOnDeleteMissingProfile() public {
-        vm.expectRevert(bytes("Profile already deleted or doesn't exist"));
-        user.deleteProfile(123);
+    function testCannotDeleteNonexistentProfile() public {
+        // Try to delete a profile that doesn't exist
+        vm.expectRevert("Profile already deleted or doesn't exist");
+        user.deleteProfile(6);
+    }
+
+    function testSoftDeletedCannotBeRead() public {
+        // Create and delete a profile
+        user.createProfile(7, "Zed", "zed@email.com", 44, "Japan", true);
+        user.deleteProfile(7);
+
+        // Trying to read it should revert
+        vm.expectRevert("Profile not found or has been deleted");
+        user.getProfile(7);
+    }
+
+    function testRecreateAfterSoftDelete() public {
+        // Create and delete a profile
+        user.createProfile(8, "Tom", "tom@email.com", 20, "Italy", true);
+        user.deleteProfile(8);
+
+        // Re-create it with new data (allowed due to soft-deletion)
+        user.createProfile(8, "TomNew", "tom@new.com", 21, "Spain", false);
+
+        User.UserProfile memory profile = user.getProfile(8);
+
+        assertEq(profile.name, "TomNew");
+        assertEq(profile.email, "tom@new.com");
+        assertEq(profile.age, 21);
+        assertEq(profile.country, "Spain");
+        assertEq(profile.isKYCApproved, false);
+        assertEq(profile.isDeleted, false);
     }
 }
 ```
@@ -439,15 +530,22 @@ import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpe
 import { expect } from "chai";
 import hre from "hardhat";
 
+// Describe our test suite for the User contract
 describe("User", function () {
+  // deployUserFixture deploys the User contract using viem and returns the deployed contract instance
+  // along with the address of the first wallet client.
   async function deployUserFixture() {
+    // Deploy the User contract using viem.
+    // The contract name ("User") must match your contract’s name.
     const userContract = await hre.viem.deployContract("User");
+    // Get the first wallet client's account address to use as a signer for simulate calls.
     const account = (await hre.viem.getWalletClients())[0].account.address;
     return { userContract, account };
   }
 
+  // Define a sample user profile object for tests.
   const sampleProfile = {
-    userId: 1n,
+    userId: 1n, // BigInt literal is used for user IDs
     name: "Alice",
     email: "alice@example.com",
     age: 30,
@@ -455,10 +553,15 @@ describe("User", function () {
     isKYCApproved: true,
   };
 
+  // -------------------------------
+  // Tests for createProfile functionality
+  // -------------------------------
   describe("createProfile", function () {
     it("should create a new profile", async function () {
+      // Use loadFixture to deploy a fresh instance of the contract.
       const { userContract } = await loadFixture(deployUserFixture);
 
+      // Call the write method for createProfile with sampleProfile data.
       await userContract.write.createProfile([
         sampleProfile.userId,
         sampleProfile.name,
@@ -468,16 +571,21 @@ describe("User", function () {
         sampleProfile.isKYCApproved,
       ]);
 
+      // Read the stored profile from the contract using the read method.
       const profile = await userContract.read.getProfile([
         sampleProfile.userId,
       ]);
+
+      // Assert that the returned profile data matches our input values.
       expect(profile.name).to.equal(sampleProfile.name);
       expect(profile.email).to.equal(sampleProfile.email);
     });
 
     it("should not allow duplicate profile creation", async function () {
+      // Deploy a fresh instance using the fixture.
       const { userContract, account } = await loadFixture(deployUserFixture);
 
+      // Create a profile with the sample data.
       await userContract.write.createProfile([
         sampleProfile.userId,
         sampleProfile.name,
@@ -487,23 +595,31 @@ describe("User", function () {
         sampleProfile.isKYCApproved,
       ]);
 
+      // Attempt to simulate (dry-run) creating a duplicate profile.
+      // We use simulate.createProfile so that no state change occurs if it fails.
       try {
         await userContract.simulate.createProfile(
           [sampleProfile.userId, "Bob", "bob@example.com", 25, "Utopia", false],
           { account }
         );
+        // If no error is thrown, the test should fail.
         expect.fail("Expected simulate.createProfile to revert");
       } catch (err: any) {
-        // Bypassing exact error message check – just ensuring an error was thrown.
+        // Check that an error is thrown.
         expect(err).to.exist;
       }
     });
   });
 
+  // -------------------------------
+  // Tests for updateProfile functionality
+  // -------------------------------
   describe("updateProfile", function () {
     it("should update an existing profile", async function () {
+      // Deploy a fresh instance.
       const { userContract } = await loadFixture(deployUserFixture);
 
+      // First, create the profile using the sample data.
       await userContract.write.createProfile([
         sampleProfile.userId,
         sampleProfile.name,
@@ -513,24 +629,30 @@ describe("User", function () {
         sampleProfile.isKYCApproved,
       ]);
 
+      // Update the profile's email using updateProfile.
       await userContract.write.updateProfile([
         sampleProfile.userId,
         sampleProfile.name,
-        "alice@updated.com",
+        "alice@updated.com", // new email value
         sampleProfile.age,
         sampleProfile.country,
         sampleProfile.isKYCApproved,
       ]);
 
+      // Read the updated profile.
       const updated = await userContract.read.getProfile([
         sampleProfile.userId,
       ]);
+
+      // Verify that the email was updated.
       expect(updated.email).to.equal("alice@updated.com");
     });
 
     it("should fail to update non-existent profile", async function () {
+      // Deploy a fresh instance.
       const { userContract, account } = await loadFixture(deployUserFixture);
 
+      // Attempt to simulate updating a profile that does not exist.
       try {
         await userContract.simulate.updateProfile(
           [999n, "Ghost", "ghost@void.com", 99, "Nowhere", false],
@@ -538,16 +660,21 @@ describe("User", function () {
         );
         expect.fail("Expected simulate.updateProfile to revert");
       } catch (err: any) {
-        // Bypassing exact error message check – just ensuring an error was thrown.
+        // Just ensure that an error was thrown.
         expect(err).to.exist;
       }
     });
   });
 
+  // -------------------------------
+  // Tests for deleteProfile functionality
+  // -------------------------------
   describe("deleteProfile", function () {
     it("should soft delete a profile", async function () {
+      // Deploy a fresh instance.
       const { userContract } = await loadFixture(deployUserFixture);
 
+      // Create the profile.
       await userContract.write.createProfile([
         sampleProfile.userId,
         sampleProfile.name,
@@ -557,31 +684,35 @@ describe("User", function () {
         sampleProfile.isKYCApproved,
       ]);
 
+      // Delete the profile.
       await userContract.write.deleteProfile([sampleProfile.userId]);
 
+      // Try reading the profile, expecting it to revert.
       try {
         await userContract.read.getProfile([sampleProfile.userId]);
         expect.fail("Expected getProfile to revert");
       } catch (err: any) {
-        // Bypassing exact error message check – just ensuring an error was thrown.
         expect(err).to.exist;
       }
     });
 
     it("should fail to delete a non-existent profile", async function () {
+      // Deploy a fresh instance.
       const { userContract, account } = await loadFixture(deployUserFixture);
 
+      // Attempt to simulate deleting a profile that does not exist.
       try {
         await userContract.simulate.deleteProfile([123n], { account });
         expect.fail("Expected simulate.deleteProfile to revert");
       } catch (err: any) {
-        // Bypassing exact error message check – just ensuring an error was thrown.
         expect(err).to.exist;
       }
     });
   });
 });
+
 ```
+Please run **Hardhat Test** script to test the smart contract
 
 ![Hardhat Test Pass](../../../img/building-with-settlemint/hardhat-test-pass-cli.png)
 
@@ -589,7 +720,9 @@ Once the test is pass, you can deploy to local hardhat network by using script -
 
 ![Hardhat Deploy Local](../../../img/building-with-settlemint/hardhat-deploy-local-cli.png)
 
-
+If you click on **Hardhat Deploy to Local Network** and nothing happens, then you are missing the step to select the correct deployment script and hitting enter key. 
+You will see a message - **Extra commandline arguments, e.g. --verify (Press 'Enter' to confirm or 'Escape' to cancel)** in the top middle of the IDE, hit enter, you will see **ignition/modules/main.ts**, edit the last part at put the correct filename (e.g. deployUser.ts), basically the name of the deployment script you created in ignition folder, and hit enter agian to run the deployment script.
+This remains true for all the deploy cases, whether on local network or platform network.
 
 ## 6. Deploy the smart contract
 
@@ -597,6 +730,14 @@ Hardhat deploy to platform network enter the path of the deployment script
 ![Select node to deploy](../../../img/building-with-settlemint/select-deployment-script.png)
 
 ignition/modules/deployUser.ts
+
+>
+>If you click on **Hardhat Deploy to Local Network** and nothing happens, then you are missing the step to select the correct deployment script and hitting enter key. 
+>You will see a message - **Extra commandline arguments, e.g. --verify (Press 'Enter' to confirm or 'Escape' to cancel)** in the top middle of the IDE, hit enter, you will see **ignition/modules/main.ts**, edit the last part at put the correct filename (e.g. deployUser.ts), basically the name of the deployment script you created in ignition folder, and hit enter agian to run the deployment script.
+>This remains true for all the deploy cases, whether on local network or platform network.
+>
+>Before deploying to network, please do not forget to login to SettleMint network via script **SettleMint Login**
+>
 
 Select the node to which you wish to deploy this smart contract. If you get an
 error, please ensure that a private key was created and attached to the node on
