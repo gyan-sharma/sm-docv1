@@ -9,7 +9,8 @@
   "add-private-keys-and-user-wallets",
   "setup-code-studio",
   "deploy-smart-contracts",
-  "setup-graph-middleware-and-api-portal",
+  "setup-api-portal",
+  "setup-graph-middleware",
   "setup-storage-and-offchain-database",
   "deploy-frontend-or-custom-services"
  ]

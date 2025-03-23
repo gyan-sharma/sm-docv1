@@ -353,3 +353,10 @@ button[data-search-full] {
 .dark a.text-fd-primary:hover {
   color: var(--sidebar-primary);
 }
+
+/* Define code block height */
+
+pre {
+  max-height: 20rem !important; 
+  overflow-y: auto;
+}

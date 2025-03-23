@@ -1,0 +1,523 @@
+---
+title: Setup API Portal
+description: Setup smart contrcat API portal
+---
+
+import { Tabs, Tab } from "fumadocs-ui/components/tabs";
+import { Callout } from "fumadocs-ui/components/callout";
+import { Steps } from "fumadocs-ui/components/steps";
+import { Card } from "fumadocs-ui/components/card";
+
+## How to setup API Portal in SettleMint platform
+
+### 1. Understanding Application Binary Interface (ABI)
+
+The Application Binary Interface (ABI) is an essential artifact in Ethereum and other EVM-based blockchain ecosystems that defines how smart contracts communicate with the outside world. It acts as a formal agreement between a deployed smart contract and any external entity—such as web applications, backend servers, wallets, or command-line tools—about how to encode and decode data for function calls, returns, and events. 
+The ABI describes, in a structured JSON format, each function’s name, inputs, outputs, type (e.g., function, constructor, event), and visibility (view, pure, payable, etc.).
+
+The ABI is generated automatically when a Solidity smart contract is compiled. When developers write a Solidity contract and run it through the Solidity compiler (solc), or through development frameworks like Hardhat or Truffle, the output includes several artifacts, one of which is the ABI. 
+This ABI is derived by analyzing the contract’s function signatures, input and output types, event declarations, and constructor. For each function, the compiler calculates a unique function selector—a 4-byte identifier based on the first 4 bytes of the keccak256 hash of the function’s signature (e.g., transfer(address,uint256)). 
+The ABI then maps these selectors to their corresponding human-readable definitions in JSON form.
+
+At runtime, when an application (like a frontend built with Web3.js or Ethers.js) wants to interact with the contract, it uses this ABI to encode the function call and its parameters into hexadecimal data that the Ethereum Virtual Machine (EVM) can understand. 
+Similarly, when the EVM returns data (e.g., the result of a view function or an event emitted during a transaction), the ABI provides the blueprint for decoding this binary data back into usable JavaScript objects.In addition to function calls, the ABI is also critical for subscribing to and decoding events emitted by the contract. Each event in the contract is represented in the ABI with a structure that allows applications to listen for specific logs on-chain and parse them into structured data.
+
+
+### 2. Using ABI from the **User.sol** smart contract which we deployed in the previous step
+
+Navigate to **/artifacts/contracts/User.sol/User.json** to find the ABI of the contract we compiled and deployed in the previous step. 
+Download the JSON file.
+
+![ABI JSON](../../../img/building-with-settlemint/abi-json.png)
+
+The ABI you will get is the following- 
+
+```json
+{
+  //User.sol Smart Contract ABI//
+
+  "_format": "hh-sol-artifact-1",
+  "contractName": "User",
+  "sourceName": "contracts/User.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "userId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ProfileCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "userId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ProfileDeleted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "userId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ProfileUpdated",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "userId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "internalType": "uint8",
+          "name": "age",
+          "type": "uint8"
+        },
+        {
+          "internalType": "string",
+          "name": "country",
+          "type": "string"
+        },
+        {
+          "internalType": "bool",
+          "name": "isKYCApproved",
+          "type": "bool"
+        }
+      ],
+      "name": "createProfile",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "userId",
+          "type": "uint256"
+        }
+      ],
+      "name": "deleteProfile",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "userId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getProfile",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "email",
+              "type": "string"
+            },
+            {
+              "internalType": "uint8",
+              "name": "age",
+              "type": "uint8"
+            },
+            {
+              "internalType": "string",
+              "name": "country",
+              "type": "string"
+            },
+            {
+              "internalType": "bool",
+              "name": "isKYCApproved",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "isDeleted",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct User.UserProfile",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "profiles",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "internalType": "uint8",
+          "name": "age",
+          "type": "uint8"
+        },
+        {
+          "internalType": "string",
+          "name": "country",
+          "type": "string"
+        },
+        {
+          "internalType": "bool",
+          "name": "isKYCApproved",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "isDeleted",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "userId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "internalType": "uint8",
+          "name": "age",
+          "type": "uint8"
+        },
+        {
+          "internalType": "string",
+          "name": "country",
+          "type": "string"
+        },
+        {
+          "internalType": "bool",
+          "name": "isKYCApproved",
+          "type": "bool"
+        }
+      ],
+      "name": "updateProfile",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523460155761116e908161001b8239f35b600080fdfe6080604052600436101561001257600080fd5b60003560e01c80632827930814610999578063985736ce1461083e578063c36fe3d614610774578063eb5339291461023d5763f08f4f641461005357600080fd5b346102385760207ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261023857600435600060a060405161009581610ea1565b6060815260606020820152826040820152606080820152826080820152015280600052600060205260ff60046040600020015460081c166101b45760005260006020526101726040600020604051906100ed82610ea1565b6100f681611035565b825261010460018201611035565b906020830191825261019f60ff60028301541660408501908152600461012c60038501611035565b936060870194855201549260ff6101856080880196828716151588528260a08a019760081c1615158752604051998a9960208b525160c060208c015260e08b01906110f7565b9051601f198a83030160408b01526110f7565b925116606087015251601f198683030160808701526110f7565b9151151560a084015251151560c08301520390f35b60846040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152602560248201527f50726f66696c65206e6f7420666f756e64206f7220686173206265656e20646560448201527f6c657465640000000000000000000000000000000000000000000000000000006064820152fd5b600080fd5b346102385761024b36610f37565b92918560009695929652600060205260ff60046040600020015460081c168015610756575b156106f8576040519161028283610ea1565b82526020820192835260ff60408301911681526060820195865260808201931515845260a0820192600084528560005260006020526040600020925180519067ffffffffffffffff82116105475781906102dc8654610fe2565b601f81116106a5575b50602090601f831160011461064257600092610637575b50506000198260011b9260031b1c19161783555b518051600184019167ffffffffffffffff82116105475781906103338454610fe2565b601f81116105e4575b50602090601f831160011461058157600092610576575b50506000198260011b9260031b1c19161790555b60ff600283019151167fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0082541617905560038101945194855167ffffffffffffffff8111610547576103b98254610fe2565b601f81116104ff575b506020601f8211600114610491579080600494939261045f9899600092610486575b50506000198260011b9260031b1c19161790555b019151151560ff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0084541691161782555115157fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00ff61ff00835492151560081b169116179055565b7f3173d9733f2b95c642a265eab5621ac9c8d59da66a7fc79c20de2530ace2ef1e600080a2005b0151905089806103e4565b601f1982169783600052816000209860005b8181106104e75750986001928492600497969561045f9b9c106104ce575b505050811b0190556103f8565b015160001960f88460031b161c191690558980806104c1565b838301518b556001909a0199602093840193016104a3565b826000526020600020601f830160051c8101916020841061053d575b601f0160051c01905b81811061053157506103c2565b60008155600101610524565b909150819061051b565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b015190508980610353565b600085815282812093601f1916905b8181106105cc57509084600195949392106105b3575b505050811b019055610367565b015160001960f88460031b161c191690558980806105a6565b92936020600181928786015181550195019301610590565b909150836000526020600020601f840160051c8101916020851061062d575b90601f859493920160051c01905b81811061061e575061033c565b60008155849350600101610611565b9091508190610603565b0151905089806102fc565b600087815282812093601f1916905b81811061068d5750908460019594939210610674575b505050811b018355610310565b015160001960f88460031b161c19169055898080610667565b92936020600181928786015181550195019301610651565b909150856000526020600020601f840160051c810191602085106106ee575b90601f859493920160051c01905b8181106106df57506102e5565b600081558493506001016106d2565b90915081906106c4565b60646040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601660248201527f50726f66696c6520616c726561647920657869737473000000000000000000006044820152fd5b5084600052600060205261076e604060002054610fe2565b15610270565b346102385760207ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261023857600435600052600060205261080360406000206107bf81611035565b9060ff6108246107d160018401611035565b92826002820154169061081160046107eb60038401611035565b9201549560405198899860c08a5260c08a01906110f7565b9088820360208a01526110f7565b91604087015285820360608701526110f7565b918181161515608085015260081c16151560a08301520390f35b346102385760207ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261023857600435806000526000602052610887604060002054610fe2565b15158061097a575b156108f65780600052600060205260046040600020016101007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00ff8254161790557fcf16d2861dfd91df4afddf545e94c3366dabf9ad0655914d7eaaa978600fb9f4600080a2005b60846040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152602860248201527f50726f66696c6520616c72656164792064656c65746564206f7220646f65736e60448201527f27742065786973740000000000000000000000000000000000000000000000006064820152fd5b5080600052600060205260ff60046040600020015460081c161561088f565b34610238576109a736610f37565b9291856000969592965260006020526109c4604060002054610fe2565b151580610e82575b15610dfe57604051916109de83610ea1565b82526020820192835260ff60408301911681526060820195865260808201931515845260a0820192600084528560005260006020526040600020925180519067ffffffffffffffff8211610547578190610a388654610fe2565b601f8111610dab575b50602090601f8311600114610d4857600092610d3d575b50506000198260011b9260031b1c19161783555b518051600184019167ffffffffffffffff8211610547578190610a8f8454610fe2565b601f8111610cea575b50602090601f8311600114610c8757600092610c7c575b50506000198260011b9260031b1c19161790555b60ff600283019151167fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0082541617905560038101945194855167ffffffffffffffff811161054757610b158254610fe2565b601f8111610c34575b506020601f8211600114610be05790806004949392610bb998996000926104865750506000198260011b9260031b1c1916179055019151151560ff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0084541691161782555115157fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00ff61ff00835492151560081b169116179055565b7f1009d11766ca0abafafcdd4e48b742e3865ee5b8239e3c3d26005003ccee88b3600080a2005b601f1982169783600052816000209860005b818110610c1c57509860019284926004979695610bb99b9c106104ce57505050811b0190556103f8565b838301518b556001909a019960209384019301610bf2565b826000526020600020601f830160051c81019160208410610c72575b601f0160051c01905b818110610c665750610b1e565b60008155600101610c59565b9091508190610c50565b015190508980610aaf565b600085815282812093601f1916905b818110610cd25750908460019594939210610cb9575b505050811b019055610ac3565b015160001960f88460031b161c19169055898080610cac565b92936020600181928786015181550195019301610c96565b909150836000526020600020601f840160051c81019160208510610d33575b90601f859493920160051c01905b818110610d245750610a98565b60008155849350600101610d17565b9091508190610d09565b015190508980610a58565b600087815282812093601f1916905b818110610d935750908460019594939210610d7a575b505050811b018355610a6c565b015160001960f88460031b161c19169055898080610d6d565b92936020600181928786015181550195019301610d57565b909150856000526020600020601f840160051c81019160208510610df4575b90601f859493920160051c01905b818110610de55750610a41565b60008155849350600101610dd8565b9091508190610dca565b60846040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152602a60248201527f50726f66696c6520646f6573206e6f74206578697374206f722068617320626560448201527f656e2064656c65746564000000000000000000000000000000000000000000006064820152fd5b5084600052600060205260ff60046040600020015460081c16156109cc565b60c0810190811067ffffffffffffffff82111761054757604052565b90601f601f19910116810190811067ffffffffffffffff82111761054757604052565b81601f820112156102385780359067ffffffffffffffff82116105475760405192610f156020601f19601f8601160185610ebd565b8284526020838301011161023857816000926020809301838601378301015290565b60c07ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc820112610238576004359160243567ffffffffffffffff81116102385782610f8491600401610ee0565b9160443567ffffffffffffffff81116102385781610fa491600401610ee0565b9160643560ff8116810361023857916084359067ffffffffffffffff821161023857610fd291600401610ee0565b9060a43580151581036102385790565b90600182811c9216801561102b575b6020831014610ffc57565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052602260045260246000fd5b91607f1691610ff1565b906040519182600082549261104984610fe2565b80845293600181169081156110b75750600114611070575b5061106e92500383610ebd565b565b90506000929192526020600020906000915b81831061109b57505090602061106e9282010138611061565b6020919350806001915483858901015201910190918492611082565b6020935061106e9592507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0091501682840152151560051b82010138611061565b919082519283825260005b848110611123575050601f19601f8460006020809697860101520116010190565b8060208092840101518282860101520161110256fea2646970667358221220c7a87838f00cef54ce452ef0a0b9199eb613cdf0c2948f9820bb0263f04dac7064736f6c634300081b0033",
+  "deployedBytecode": "0x6080604052600436101561001257600080fd5b60003560e01c80632827930814610999578063985736ce1461083e578063c36fe3d614610774578063eb5339291461023d5763f08f4f641461005357600080fd5b346102385760207ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261023857600435600060a060405161009581610ea1565b6060815260606020820152826040820152606080820152826080820152015280600052600060205260ff60046040600020015460081c166101b45760005260006020526101726040600020604051906100ed82610ea1565b6100f681611035565b825261010460018201611035565b906020830191825261019f60ff60028301541660408501908152600461012c60038501611035565b936060870194855201549260ff6101856080880196828716151588528260a08a019760081c1615158752604051998a9960208b525160c060208c015260e08b01906110f7565b9051601f198a83030160408b01526110f7565b925116606087015251601f198683030160808701526110f7565b9151151560a084015251151560c08301520390f35b60846040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152602560248201527f50726f66696c65206e6f7420666f756e64206f7220686173206265656e20646560448201527f6c657465640000000000000000000000000000000000000000000000000000006064820152fd5b600080fd5b346102385761024b36610f37565b92918560009695929652600060205260ff60046040600020015460081c168015610756575b156106f8576040519161028283610ea1565b82526020820192835260ff60408301911681526060820195865260808201931515845260a0820192600084528560005260006020526040600020925180519067ffffffffffffffff82116105475781906102dc8654610fe2565b601f81116106a5575b50602090601f831160011461064257600092610637575b50506000198260011b9260031b1c19161783555b518051600184019167ffffffffffffffff82116105475781906103338454610fe2565b601f81116105e4575b50602090601f831160011461058157600092610576575b50506000198260011b9260031b1c19161790555b60ff600283019151167fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0082541617905560038101945194855167ffffffffffffffff8111610547576103b98254610fe2565b601f81116104ff575b506020601f8211600114610491579080600494939261045f9899600092610486575b50506000198260011b9260031b1c19161790555b019151151560ff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0084541691161782555115157fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00ff61ff00835492151560081b169116179055565b7f3173d9733f2b95c642a265eab5621ac9c8d59da66a7fc79c20de2530ace2ef1e600080a2005b0151905089806103e4565b601f1982169783600052816000209860005b8181106104e75750986001928492600497969561045f9b9c106104ce575b505050811b0190556103f8565b015160001960f88460031b161c191690558980806104c1565b838301518b556001909a0199602093840193016104a3565b826000526020600020601f830160051c8101916020841061053d575b601f0160051c01905b81811061053157506103c2565b60008155600101610524565b909150819061051b565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052604160045260246000fd5b015190508980610353565b600085815282812093601f1916905b8181106105cc57509084600195949392106105b3575b505050811b019055610367565b015160001960f88460031b161c191690558980806105a6565b92936020600181928786015181550195019301610590565b909150836000526020600020601f840160051c8101916020851061062d575b90601f859493920160051c01905b81811061061e575061033c565b60008155849350600101610611565b9091508190610603565b0151905089806102fc565b600087815282812093601f1916905b81811061068d5750908460019594939210610674575b505050811b018355610310565b015160001960f88460031b161c19169055898080610667565b92936020600181928786015181550195019301610651565b909150856000526020600020601f840160051c810191602085106106ee575b90601f859493920160051c01905b8181106106df57506102e5565b600081558493506001016106d2565b90915081906106c4565b60646040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601660248201527f50726f66696c6520616c726561647920657869737473000000000000000000006044820152fd5b5084600052600060205261076e604060002054610fe2565b15610270565b346102385760207ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261023857600435600052600060205261080360406000206107bf81611035565b9060ff6108246107d160018401611035565b92826002820154169061081160046107eb60038401611035565b9201549560405198899860c08a5260c08a01906110f7565b9088820360208a01526110f7565b91604087015285820360608701526110f7565b918181161515608085015260081c16151560a08301520390f35b346102385760207ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc36011261023857600435806000526000602052610887604060002054610fe2565b15158061097a575b156108f65780600052600060205260046040600020016101007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00ff8254161790557fcf16d2861dfd91df4afddf545e94c3366dabf9ad0655914d7eaaa978600fb9f4600080a2005b60846040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152602860248201527f50726f66696c6520616c72656164792064656c65746564206f7220646f65736e60448201527f27742065786973740000000000000000000000000000000000000000000000006064820152fd5b5080600052600060205260ff60046040600020015460081c161561088f565b34610238576109a736610f37565b9291856000969592965260006020526109c4604060002054610fe2565b151580610e82575b15610dfe57604051916109de83610ea1565b82526020820192835260ff60408301911681526060820195865260808201931515845260a0820192600084528560005260006020526040600020925180519067ffffffffffffffff8211610547578190610a388654610fe2565b601f8111610dab575b50602090601f8311600114610d4857600092610d3d575b50506000198260011b9260031b1c19161783555b518051600184019167ffffffffffffffff8211610547578190610a8f8454610fe2565b601f8111610cea575b50602090601f8311600114610c8757600092610c7c575b50506000198260011b9260031b1c19161790555b60ff600283019151167fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0082541617905560038101945194855167ffffffffffffffff811161054757610b158254610fe2565b601f8111610c34575b506020601f8211600114610be05790806004949392610bb998996000926104865750506000198260011b9260031b1c1916179055019151151560ff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0084541691161782555115157fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00ff61ff00835492151560081b169116179055565b7f1009d11766ca0abafafcdd4e48b742e3865ee5b8239e3c3d26005003ccee88b3600080a2005b601f1982169783600052816000209860005b818110610c1c57509860019284926004979695610bb99b9c106104ce57505050811b0190556103f8565b838301518b556001909a019960209384019301610bf2565b826000526020600020601f830160051c81019160208410610c72575b601f0160051c01905b818110610c665750610b1e565b60008155600101610c59565b9091508190610c50565b015190508980610aaf565b600085815282812093601f1916905b818110610cd25750908460019594939210610cb9575b505050811b019055610ac3565b015160001960f88460031b161c19169055898080610cac565b92936020600181928786015181550195019301610c96565b909150836000526020600020601f840160051c81019160208510610d33575b90601f859493920160051c01905b818110610d245750610a98565b60008155849350600101610d17565b9091508190610d09565b015190508980610a58565b600087815282812093601f1916905b818110610d935750908460019594939210610d7a575b505050811b018355610a6c565b015160001960f88460031b161c19169055898080610d6d565b92936020600181928786015181550195019301610d57565b909150856000526020600020601f840160051c81019160208510610df4575b90601f859493920160051c01905b818110610de55750610a41565b60008155849350600101610dd8565b9091508190610dca565b60846040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152602a60248201527f50726f66696c6520646f6573206e6f74206578697374206f722068617320626560448201527f656e2064656c65746564000000000000000000000000000000000000000000006064820152fd5b5084600052600060205260ff60046040600020015460081c16156109cc565b60c0810190811067ffffffffffffffff82111761054757604052565b90601f601f19910116810190811067ffffffffffffffff82111761054757604052565b81601f820112156102385780359067ffffffffffffffff82116105475760405192610f156020601f19601f8601160185610ebd565b8284526020838301011161023857816000926020809301838601378301015290565b60c07ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc820112610238576004359160243567ffffffffffffffff81116102385782610f8491600401610ee0565b9160443567ffffffffffffffff81116102385781610fa491600401610ee0565b9160643560ff8116810361023857916084359067ffffffffffffffff821161023857610fd291600401610ee0565b9060a43580151581036102385790565b90600182811c9216801561102b575b6020831014610ffc57565b7f4e487b7100000000000000000000000000000000000000000000000000000000600052602260045260246000fd5b91607f1691610ff1565b906040519182600082549261104984610fe2565b80845293600181169081156110b75750600114611070575b5061106e92500383610ebd565b565b90506000929192526020600020906000915b81831061109b57505090602061106e9282010138611061565b6020919350806001915483858901015201910190918492611082565b6020935061106e9592507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0091501682840152151560051b82010138611061565b919082519283825260005b848110611123575050601f19601f8460006020809697860101520116010190565b8060208092840101518282860101520161110256fea2646970667358221220c7a87838f00cef54ce452ef0a0b9199eb613cdf0c2948f9820bb0263f04dac7064736f6c634300081b0033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
+```
+
+In this ABI, we have a set of functions, inputs, outputs, and events captured from the User.sol smart contract. It outlines how external applications can interact with the contract by providing structured definitions for each callable function and emitted event.
+
+
+####  Functions
+
+| Function Name    | Inputs                                                                                                                                            | Outputs                                                                                                        |
+|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| `createProfile`  | `userId: uint256`, `name: string`, `email: string`, `age: uint8`, `country: string`, `isKYCApproved: bool`                                         | –                                                                                                               |
+| `deleteProfile`  | `userId: uint256`                                                                                                                                 | –                                                                                                               |
+| `getProfile`     | `userId: uint256`                                                                                                                                 | `(name: string, email: string, age: uint8, country: string, isKYCApproved: bool, isDeleted: bool)`             |
+| `profiles`       | `userId: uint256` (mapping accessor)                                                                                                              | `(name: string, email: string, age: uint8, country: string, isKYCApproved: bool, isDeleted: bool)`             |
+| `updateProfile`  | `userId: uint256`, `name: string`, `email: string`, `age: uint8`, `country: string`, `isKYCApproved: bool`                                         | –                                                                                                               |
+
+####  Events
+
+| Event Name        | Parameters                        |
+|-------------------|------------------------------------|
+| `ProfileCreated`  | `userId: uint256 (indexed)`        |
+| `ProfileDeleted`  | `userId: uint256 (indexed)`        |
+| `ProfileUpdated`  | `userId: uint256 (indexed)`        |
+
+
+### 3. Add API Portal Middleware to your application
+
+Middleware acts as a bridge between your blockchain network and applications,
+providing essential services like data indexing, API access, and event
+monitoring. Before adding middleware, ensure you have an application and
+blockchain node in place.
+
+## How to Add Middleware
+
+<Tabs items={['SDK CLI', 'Platform UI',  'SDK JS']}>
+  <Tab value="Platform UI">
+    <Steps>
+      ### Navigate to Application
+      Navigate to the **application** where you want to add middleware.
+
+      ### Access Middleware Section
+      Click **Middleware** in the left navigation, and then click **Add a middleware**. This opens a form.
+
+      ### Configure Middleware
+      1. Choose API Portal
+      2. Choose a **Middleware name**
+      3. Select the **blockchain node**
+      4. Configure deployment settings
+      5. Click **Confirm**
+    </Steps>
+
+  </Tab>
+
+  <Tab value="SDK CLI">
+    First ensure you're authenticated:
+    ```bash
+    settlemint login
+    ```
+
+    Create a middleware:
+    ```bash
+    # Get the list of available middleware types
+    settlemint platform create middleware --help
+
+    # Create a middleware
+    settlemint platform create middleware <type> <name>
+
+    # Get information about the command and all available options
+    settlemint platform create middleware <type> --help
+    ```
+
+  </Tab>
+
+  <Tab value="SDK JS">
+    ```typescript
+    import { createSettleMintClient } from '@settlemint/sdk-js';
+
+    const client = createSettleMintClient({
+      accessToken: 'your_access_token',
+      instance: 'https://console.settlemint.com'
+    });
+
+    // Create middleware
+    const createMiddleware = async () => {
+      const result = await client.middleware.create({
+        applicationUniqueName: "your-app-unique-name",
+        name: "my-middleware",
+        type: "SHARED",
+        interface: "GRAPH",
+        blockchainNodeUniqueName: "your-node-unique-name",
+        region: "EUROPE",  // Required
+        provider: "GKE",   // Required
+        size: "SMALL"      // Valid options: "SMALL" | "MEDIUM" | "LARGE"
+      });
+      console.log('Middleware created:', result);
+    };
+    ```
+
+    <Callout type="tip">
+    Get your access token from the Platform UI under User Settings → API Tokens.
+    </Callout>
+
+  </Tab>
+</Tabs>
+
+## Manage Middleware
+
+<Tabs items={['SDK CLI', 'Platform UI','SDK JS']}>
+  <Tab value="Platform UI">
+    Navigate to your middleware and click **Manage middleware** to:
+    - View middleware details and status
+    - Update configurations
+    - Monitor health
+    - Access endpoints
+  </Tab>
+
+  <Tab value="SDK CLI">
+    ```bash
+    # List middlewares
+    settlemint platform list middlewares --application <app-name>
+
+    # Get middleware details
+    settlemint platform read middleware <middleware-name>
+
+    # Delete middleware
+    settlemint platform delete middleware <middleware-name>
+    ```
+
+  </Tab>
+
+  <Tab value="SDK JS">
+    ```typescript
+    // List middlewares
+    await client.middleware.list("your-app");
+
+    // Get middleware details
+    await client.middleware.read("middleware-unique-name");
+
+    // Delete middleware
+    await client.middleware.delete("middleware-unique-name");
+    ```
+
+  </Tab>
+</Tabs>
+
+
+![Add Smart Contract API Portal](../../../img/building-with-settlemint/add-api-portal.png)
+
+You can upload or copy paste the ABI 
+
+![Upload ABI to API Portal](../../../img/building-with-settlemint/upload-abi.png)
+
+In a few minutes we get a REST and GraphQL API layer
+
+![API Portal UI](../../../img/building-with-settlemint/api-portal-ui.png)
+
+To update the ABIs of an existing smart contract portal middleware navigate to
+the middleware, go the details and click on the 'Manage Middleware' button on
+the top right. Click on the 'Update ABIs' item and a dialog will open. In this
+dialog upload the ABI file(s) you saved on your local filesystem in the previous
+step.
+
+### 4. How to configure REST API requests in the portal
+
+To interact with your smart contract via the API Portal, follow these steps:
+
+![API Portal call success](../../../img/building-with-settlemint/portal-call-success.png)
+
+#### Get the Base URL
+
+Navigate to the **Connect** tab in the portal middleware to obtain the base API URL. It will look something like:
+
+```
+https://api-portal-affe9.gke-europe.settlemint.com/
+```
+
+For exact endpoints, refer to the portal UI. An example endpoint might look like this:
+
+```
+https://api-portal-affe9.gke-europe.settlemint.com/api/user-smart-contract-abi/{address}/create-profile
+```
+
+Here, `{address}` should be replaced with the deployed smart contract address on the blockchain.
+
+>  You can find the deployed contract address in the `deployed_addresses.json` file located inside the `ignition/deployments` folder.
+
+####  Sample Request Body
+
+Here’s an example JSON body for a smart contract function like `createProfile`:
+
+```json
+{
+  "from": "",
+  "gasLimit": "",
+  "gasPrice": "",
+  "simulate": true,
+  "metadata": {},
+  "input": {
+    "userId": "",
+    "name": "",
+    "email": "",
+    "age": 0,
+    "country": "",
+    "isKYCApproved": true
+  }
+}
+```
+
+####  Field Descriptions
+
+- **`from`**: Public key of the wallet that will initiate the transaction. Typically, this is the deployer's address. For advanced scenarios, this can be a specific user's public address, depending on roles.
+- **`gasLimit`**: Use a reasonably high value for zero-gas private networks. For others, determine a realistic value through trial and error. You can fine-tune this based on actual gas usage from previous transactions.
+- **`gasPrice`**: Set to `0` for zero-gas networks, or specify an appropriate value for gas-charging private or public networks.
+- **`simulate`**: Leave as `true` for a dry run before sending actual transactions.
+- **`metadata`**: Can be left empty or with default values unless your application requires it.
+- **`input`**: Include all parameters required by the smart contract function you are calling.
+
+#### Authentication
+
+Use your **Application Access Token** as the API key for authentication. You can generate this token from the **Access Tokens** section in your application dashboard (left sidebar menu) and will look something like **sm_aat_fd0fbe61cf102b6c**.
+
+#### Expected Response
+
+If the request is valid, the API will return a: **200 OK** along with the **transaction hash** in the response body.
+Else various error codes with respective messages will be returned. 
+
+
+### 5. How to configure GraphQL API requests in the portal
+
+![API Portal GraphQL](../../../img/building-with-settlemint/api-portal-graphql.png)
+
+### How to Configure a GraphQL Request in the API Portal
+
+To query smart contract data using GraphQL in the SettleMint API Portal, navigate to the **GraphQL** tab in the portal interface. You will see a visual GraphQL explorer that allows you to construct and test your queries easily. The endpoint for GraphQL is provided under the **Connect** tab, typically looking like:
+
+```
+https://api-portal-affe9.gke-europe.settlemint.com/graphql
+```
+
+In the explorer, start by selecting the appropriate query object exposed in the API, such as `UserSmartContractAbi`. You’ll need to provide the `address` parameter, which corresponds to the deployed smart contract address. This address ensures that your request is directed to the correct smart contract instance on-chain.
+
+Once the address is entered, you can choose the function or field you want to query. For example, selecting the `profiles` field and providing a `uint256` ID (such as `"101"`) will retrieve the user profile associated with that ID. You can then pick which fields of the profile you want to fetch—like `name`, `email`, `age`, `country`, `isKYCApproved`, and `isDeleted`.
+
+After you’ve built your query, hit the play button to execute it. If successful, the response will appear on the right-hand panel, showing the structured result returned from the smart contract. In this case, you might get a profile with a name, email, country, age, and flags indicating whether the profile is deleted or KYC-approved.
+
+This intuitive interface allows developers to rapidly test GraphQL queries without needing to write code or leave the portal. 
+This can be used for debugging, exploring contract data, and integrating smart contract logic into frontend or backend systems using GraphQL.
+
+
+
+
+
+
