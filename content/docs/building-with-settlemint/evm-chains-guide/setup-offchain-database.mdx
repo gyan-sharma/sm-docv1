@@ -1,6 +1,6 @@
 ---
 title: Setup off-chain Database
-description: Add Hasura backend-as-a-service with off-chain database 
+description: Add Hasura backend-as-a-service with off-chain database
 ---
 
 import { Tabs, Tab } from "fumadocs-ui/components/tabs";
@@ -8,176 +8,100 @@ import { Callout } from "fumadocs-ui/components/callout";
 import { Steps } from "fumadocs-ui/components/steps";
 import { Card } from "fumadocs-ui/components/card";
 
-## How to add off-chain database and storage in SettleMint platform
-
-
-Managing complex or large data in decentralized systems can be a challenge. To
-securely store and share your files and data, SettleMint offers two storage
-solutions that can interact with the blockchain: **IPFS (decentralized)** and
-**MinIO (centralized)**.
-
-## Add Storage
-
-<Tabs items={['Platform UI', 'SDK CLI', 'SDK JS']}>
-  <Tab value="Platform UI">
-    Navigate to the **application** where you want to add storage. Click **Storage** in the left navigation, and then click **Add storage**. This opens a form.
-
-    <Steps>
-      ### Configure Storage
-      1. Choose storage type (IPFS or MinIO)
-      2. Choose a **Storage name**
-      3. Configure deployment settings
-      4. Click **Confirm**
-    </Steps>
-
-  </Tab>
-
-  <Tab value="SDK CLI">
-    First ensure you're authenticated:
-    ```bash
-    settlemint login
-    ```
-
-    Create storage:
-    ```bash
-    # Get the list of available storage types
-    settlemint platform create storage --help
-
-    # Create storage
-    settlemint platform create storage <type> <name>
-
-    # Get information about the command and all available options
-    settlemint platform create storage <type> --help
-    ```
-
-  </Tab>
-
-  <Tab value="SDK JS">
-    For a full example of how to connect to a storage using the SDK, see the [MinIO SDK API Reference](https://www.npmjs.com/package/@settlemint/sdk-minio#api-reference) or [IPFS SDK API Reference](https://www.npmjs.com/package/@settlemint/sdk-ipfs#api-reference).
-
-    <Callout type="info">
-    Get your access token from the Platform UI under User Settings → API Tokens.
-    </Callout>
-
-    <Callout type="info">
-    The SDK enables you to:
-    - Use IPFS for decentralized storage - check out the [IPFS SDK documentation](https://github.com/settlemint/sdk/tree/main/sdk/ipfs)
-    - Use MinIO for S3-compatible storage - check out the [MinIO SDK documentation](https://github.com/settlemint/sdk/tree/main/sdk/minio)
-    </Callout>
-
-  </Tab>
-</Tabs>
-
-## Manage Storage
-
-<Tabs items={['Platform UI', 'SDK CLI', 'SDK JS']}>
-  <Tab value="Platform UI">
-    Navigate to your storage and click **Manage storage** to:
-    - View storage details and status
-    - Monitor health
-    - Access storage interface
-    - Update configurations
-  </Tab>
-
-  <Tab value="SDK CLI">
-    ```bash
-    # List storage instances
-    settlemint platform list storage --application <app-name>
-
-    # Get storage details
-    settlemint platform read storage <name>
-
-    # Delete storage
-    settlemint platform delete storage <name>
-    ```
-
-  </Tab>
-
-  <Tab value="SDK JS">
-    ```typescript
-    // List storage instances
-    const listStorage = async () => {
-      const storages = await client.storage.list("your-app-id");
-      console.log('Storage instances:', storages);
-    };
-
-    // Get storage details
-    const getStorage = async () => {
-      const storage = await client.storage.read("storage-unique-name");
-      console.log('Storage details:', storage);
-    };
-
-    // Delete storage
-    const deleteStorage = async () => {
-      await client.storage.delete("storage-unique-name");
-    };
-    ```
-
-  </Tab>
-</Tabs>
-
-## About IPFS (decentralized)
-
-The InterPlanetary File System (IPFS) is a peer-to-peer network for storing and
-sharing data in a distributed file system. When uploading a file to IPFS it
-generates a unique fingerprint (hash). Later when querying that data it will use
-that fingerprint to find nodes storing the data behind this fingerprint. This
-means that this hash is not only a key used to retrieve a file, but it also
-serves as a proof of integrity. Often such fingerprints will be stored on chain
-in order to act as a bridge between the blockchain and IPFS.
-
-[Learn more on IPFS here](https://docs.ipfs.tech/concepts/)
-
-## About MinIO (centralized - S3 compatible)
-
-For private or confidential data, MinIO would be your preferred option.
-
-[Learn more on MinIO here](https://min.io/)
-
-MinIO is S3-compatible. If you want to **set up a MinIO client for AWS S3**, you
-need these parameters:
-
-**endPoint** The endpoint is the URL to object storage service. Example value:
-example-minio-123a.settlemint.com, unique-name.settlemint.com (you can get the
-unique name from the Details tab)
-
-**accessKey** The access key is like a user ID that uniquely identifies your
-account. You can get your access key under the **Connect tab**
-
-**secretKey** The secret key is like the password to your account. You can get
-your secret key under the **Connect tab**.
-
-```js
-var Minio = require("minio");
-
-var s3Client = new Minio.Client({
-  endPoint: "your-minio-instance.settlemint.com",
-  accessKey: "YOUR-ACCESSKEYID",
-  secretKey: "YOUR-SECRETACCESSKEY",
-});
-```
-
-You can now use the s3Client object to call methods like `makeBucket`,
-`getObject`, and
-[many more methods which you can find here](https://docs.min.io/docs/javascript-client-api-reference.html).
-
-<Callout type="info">
-  MinIO client can also be configured in Python, .NET, Java, Golang, Haskell.
-  You can follow the [quickstart guides provided by MinIO
-  here](https://docs.min.io/docs/java-client-quickstart-guide.html) for more
-  information.
-</Callout>
-
-<Callout type="info">
-  All operations require appropriate permissions in your workspace.
-</Callout>
-
-
-# Hasura - Backend-as-a-service
-
 Many dApps need more than just decentralized tools to build an end-to-end
 solution. The SettleMint Hasura SDK provides a seamless way to interact with
 Hasura GraphQL APIs for managing application data.
+
+# Hybrid On-chain and Off-chain Data Architecture with Hasura on SettleMint
+
+## Context and Need for a Hybrid Data Approach
+
+In blockchain-based applications, not all data needs to—or should—reside
+on-chain. While critical state changes, token ownerships, or verifiable proofs
+are best kept immutable and transparent on a blockchain, a large portion of
+application data such as user profiles, analytics, logs, metadata, and UI-driven
+state is better suited to an off-chain data store. Storing everything on-chain
+is neither cost-effective nor performance-friendly. On-chain data is expensive
+to store and slow to query for complex front-end or dashboard use cases.
+
+This is where a **hybrid architecture** becomes essential. In such an approach,
+data is partitioned based on its importance and usage:
+
+- **On-chain layer** serves as the source of truth for verifiable,
+  consensus-driven actions like token transfers, proofs, and governance.
+- **Off-chain layer** handles high-volume, user-generated, or fast-changing data
+  that benefits from relational structure, rich queries, and low latency.
+
+This model provides the best of both worlds: **immutability and trust from
+blockchain**, and **speed, flexibility, and developer-friendliness from
+traditional databases**.
+
+## How Hasura on SettleMint Supports This Architecture
+
+SettleMint offers Hasura as a Backend-as-a-Service (BaaS), tightly integrated
+into its low-code blockchain development stack. Hasura provides a
+high-performance, real-time GraphQL API layer on top of a PostgreSQL database,
+and allows developers to instantly query, filter, and subscribe to changes in
+the data—without writing custom backend logic.
+
+### Key Capabilities of Hasura on SettleMint
+
+- A fully managed **PostgreSQL database** is provisioned automatically with each
+  Hasura instance.
+- Hasura auto-generates a powerful and expressive **GraphQL API** for all the
+  tables and relationships defined in the database.
+- It allows **integration with external databases** or REST/GraphQL services,
+  making it possible to unify multiple data sources behind one GraphQL endpoint.
+- **Role-based access control** ensures secure data access aligned with business
+  logic and user permissions.
+
+## Benefits of Using Hasura in a Blockchain Project
+
+Hasura is especially useful for building interfaces, dashboards, and off-chain
+tools in blockchain applications. Developers can use it to:
+
+- Store non-critical or frequently updated data like user preferences, audit
+  logs, or API call metadata.
+- Power admin panels or reporting dashboards with complex filtering, sorting,
+  and aggregation capabilities.
+- Perform fast and reliable queries without the overhead of smart contract reads
+  or event processing.
+- Sync or mirror blockchain data into Postgres via indexing services (like The
+  Graph or custom workers), and build additional logic around it.
+
+For example, while the verification of a credential or the execution of a
+transaction happens on-chain, the user’s profile details, usage history, or
+interactions with the platform can be managed off-chain using Hasura. This
+results in a responsive and scalable user experience, without compromising on
+the core security and trust guarantees of blockchain.
+
+## Summary
+
+SettleMint’s Hasura integration enables a clean separation of concerns in
+blockchain applications—on-chain for truth and verification, off-chain for
+user-centric and performance-sensitive features. Developers get instant GraphQL
+APIs, a relational database, and the flexibility to scale across data sources.
+This hybrid approach simplifies architecture while maintaining decentralization
+where it truly matters.
+
+# Off-chain Database Use Cases in Blockchain Applications
+
+| Category                        | Use Cases                                                                                        |
+| ------------------------------- | ------------------------------------------------------------------------------------------------ |
+| **User Management & Metadata**  | User profiles, KYC/AML data, Recovery info, Social links, Preferences, Session tokens            |
+| **Dashboards & Reporting**      | Admin panels, KPIs, Filters & aggregation, Charts, Audit logs, Time-series insights              |
+| **App Logic & State**           | Workflow states, Business rules, Off-chain approvals, Drafts, Automation triggers, API call logs |
+| **User Content**                | Blog posts, Comments, Ratings, Articles, Feedback, Forum threads, Attachments                    |
+| **External/API Data**           | Oracle/cache data, API mirrors, Off-chain credentials, IoT inputs, External system sync          |
+| **Historical & Time Data**      | Snapshots, Transition logs, Archived state, Event sync history, Audit trails                     |
+| **Content & Config**            | UI content, Static pages, Themes, Menus, Feature flags, Editable app config                      |
+| **UX & Transactions**           | Pending tx queues, Gas estimates, Slippage data, NFT views, Pre-submit staging, Local metadata   |
+| **Admin & Dev Tools**           | Schema maps, Dev notes, Admin dashboards, Background jobs, Flagged items                         |
+| **Security & Access**           | Role bindings, Access logs, Encrypted fields, Policy metadata, Permissions history               |
+| **Hybrid & Indexing**           | Enriched on-chain data, Indexed events, ID mapping, Postgres mirroring, ETL-ready layers         |
+| **E-commerce / Token Economy**  | Product catalog, Shopping cart, Delivery tracking, Disputes, Refund metadata                     |
+| **Education / DAO / Community** | Learning progress, Badges, Voting drafts, Moderation flags, Contribution history                 |
+| **Data Ops & Recovery**         | Data backups, Exportable datasets, Disaster recovery layer, Compliance archiving                 |
 
 ## Add Hasura
 
@@ -268,121 +192,7 @@ This is of course on top of the
 and [personal access tokens](/building-with-settlemint/personal-access-tokens)
 in the platform you can use to close off access to the entire API.
 
-## Backups
 
-You should take a backup of the following components:
-
-1. Hasura Database
-2. Hasura Metadata
-
-### Steps for taking a backup of Hasura Database
-
-1. Install Hasura CLI
-   (https://hasura.io/docs/latest/hasura-cli/install-hasura-cli/)
-2. Run hasura init command to initiate a new Hasura project in the working
-   directory.
-3. Edit config.yaml file to configure remote Hasura instance. We need to
-   generate an API Key in BPaaS and pass it with the endpoint.
-
-Syntax of config.yaml:
-
-```
-version: 3
-endpoint: <hasura-db-endpoint-here/API-key> 
-admin_secret: <admin-secret-here>
-metadata_directory: metadata
-actions:
- kind: synchronous
- handler_webhook_baseurl: http://localhost:3000
-```
-
-Example
-
-```
-endpoint: https://hasuradb-15ce.gke-japan.settlemint.com/sm_aat_86530f5bf93d82a9
-admin_secret: dc5eb1b93f43fd28c53e
-metadata_directory: metadata
-actions:
- kind: synchronous
- handler_webhook_baseurl: http://localhost:3000
-
-```
-
-4. Run hasura console command. (this command will sync everything to your local
-   hasura instance.)
-5. Run this curl command to generate DB export:
-
-Curl Format
-
-```
-curl -d '{"opts": [ "-O", "-x", "--schema=public", "--inserts"], "clean_output": true, "source": "default"}' -H "x-hasura-admin-secret: <SecretKey>" <Endpoint URL/APIKey>/v1alpha1/pg_dump > db.sql
-```
-
-Example Curl
-
-```
-curl -d '{"opts": [ "-O", "-x", "--schema=public", "--inserts"], "clean_output": true, "source": "default"}' -H "x-hasura-admin-secret:78b0e4618125322de0eb" https://fuchsiacapybara-7f70.gke-europe.settlemint.com/bpaas-1d79Acd6A2f112EA450F1C07a372a7D582E6121F/v1alpha1/pg_dump > db.sql
-```
-
-### Importing data into a new instance
-
-Please copy the content of the exported db.sql file, paste it and execute as a
-SQL statement.
-
-![Import](../../../img/blockchain-guide/Hasura_Import.png)
-
-> More info on this and other commands can be found in the
-> [Hasura docs](https://hasura.io/docs/latest/api-reference/pgdump/), please
-> note to always add the x-auth-token header with an api key for your Hasura
-> instance.
-
-### Steps for taking a backup of Hasura Metadata
-
-Hasura Metadata Export is a collection of yaml files which captures all the
-Metadata required by the GraphQL Engine. This includes info about tables that
-are tracked, permission rules, relationships, and event triggers that are
-defined on those tables.
-
-If you have already initialized your project via the Hasura CLI you should see
-the Metadata directory structure in your project directory.
-
-To export your entire Metadata using the Hasura CLI execute the following
-command in your terminal:
-
-```
-#in hasura CLI
-hasura metadata export
-```
-
-This will export the Metadata as YAML files in the /metadata directory
-
-### Steps for importing or applying Hasura Metadata
-
-You can apply Metadata from one Hasura Server instance to another. You can also
-apply an older or modified version of an instance's Metadata onto itself to
-replace the existing Metadata. Applying or importing completely replaces the
-Metadata on that instance, i.e. you lose any Metadata that existed before
-applying.
-
-```
-#in hasura CLI
-hasura metadata apply
-```
-
-### Reload Hasura Metadata
-
-In some cases, the Metadata can be out of sync with the database schema. For
-example, when a new column has been added to a table via an external tool.
-
-```
-#in hasura CLI
-hasura metadata reload
-```
-
-For more on Hasura Metadata, refer:
-https://hasura.io/docs/latest/migrations-metadata-seeds/manage-metadata/ For
-more on Hasura Migrations, refer:
-https://hasura.io/docs/latest/migrations-metadata-seeds/manage-migrations/
 
 ## Usage Examples
 
@@ -564,9 +374,9 @@ You can interact with your Hasura database in two ways: through the GraphQL API
   </Tab>
 </Tabs>
 
-### Authentication Setup
+## Hasura Postgress database access and connection
 
-To run these examples, you'll need the following:
+![Hasura Connect](../../../img/building-with-settlemint/hasura-connect.png)
 
 For GraphQL API:
 
@@ -584,3 +394,153 @@ For PostgreSQL:
   Use environment variables or a secure configuration management system in
   production environments.
 </Callout>
+
+Understanding postgress connection string 
+
+**postgresql://hasura-f1cd9:0c510604a378d348e7ed@p2p.gke-europe.settlemint.com:30787/hasura-f1cd9**
+
+Here's how it's broken down:
+
+- **Protocol**: `postgresql://`  
+  Indicates the connection type — PostgreSQL database over TCP.
+
+- **Username**: `hasura-f1cd9`  
+  The database username used for authentication.
+
+- **Password**: `0c510604a378d348e7ed`  
+  The corresponding password for the above username.
+
+- **Host**: `p2p.gke-europe.settlemint.com`  
+  The server address (domain or IP) where the PostgreSQL database is hosted.
+
+- **Port**: `30787`  
+  The network port on which the PostgreSQL service is listening.
+
+- **Database Name**: `hasura-f1cd9`  
+  The specific PostgreSQL database to connect to on that server.
+
+
+## Hasura Backup
+
+Via CLI pgdump command
+
+```sql
+PGPASSWORD=0c510604a378d348e7ed pg_dump \
+  -h p2p.gke-europe.settlemint.com \
+  -p 30787 \
+  -U hasura-f1cd9 \
+  -d hasura-f1cd9 \
+  -F p \
+  -f ~/Desktop/hasura_backup.sql
+  ```
+
+
+
+## Taking backup via Hasura CLI
+
+1. Hasura Database
+2. Hasura Metadata
+
+### Steps for taking a backup of Hasura Database
+
+1. Install Hasura CLI
+   (https://hasura.io/docs/latest/hasura-cli/install-hasura-cli/)
+2. Run hasura init command to initiate a new Hasura project in the working
+   directory.
+3. Edit config.yaml file to configure remote Hasura instance. We need to
+   generate an API Key in BPaaS and pass it with the endpoint.
+
+Syntax of config.yaml:
+
+```
+version: 3
+endpoint: <hasura-db-endpoint-here/API-key>
+admin_secret: <admin-secret-here>
+metadata_directory: metadata
+actions:
+ kind: synchronous
+ handler_webhook_baseurl: http://localhost:3000
+```
+
+Example
+
+```
+endpoint: https://hasuradb-15ce.gke-japan.settlemint.com/sm_aat_86530f5bf93d82a9
+admin_secret: dc5eb1b93f43fd28c53e
+metadata_directory: metadata
+actions:
+ kind: synchronous
+ handler_webhook_baseurl: http://localhost:3000
+
+```
+
+4. Run hasura console command. (this command will sync everything to your local
+   hasura instance.)
+5. Run this curl command to generate DB export:
+
+Curl Format
+
+```
+curl -d '{"opts": [ "-O", "-x", "--schema=public", "--inserts"], "clean_output": true, "source": "default"}' -H "x-hasura-admin-secret: <SecretKey>" <Endpoint URL/APIKey>/v1alpha1/pg_dump > db.sql
+```
+
+Example Curl
+
+```
+curl -d '{"opts": [ "-O", "-x", "--schema=public", "--inserts"], "clean_output": true, "source": "default"}' -H "x-hasura-admin-secret:78b0e4618125322de0eb" https://fuchsiacapybara-7f70.gke-europe.settlemint.com/bpaas-1d79Acd6A2f112EA450F1C07a372a7D582E6121F/v1alpha1/pg_dump > db.sql
+```
+
+### Importing data into a new instance
+
+Please copy the content of the exported db.sql file, paste it and execute as a
+SQL statement.
+
+
+
+### Steps for taking a backup of Hasura Metadata
+
+Hasura Metadata Export is a collection of yaml files which captures all the
+Metadata required by the GraphQL Engine. This includes info about tables that
+are tracked, permission rules, relationships, and event triggers that are
+defined on those tables.
+
+If you have already initialized your project via the Hasura CLI you should see
+the Metadata directory structure in your project directory.
+
+To export your entire Metadata using the Hasura CLI execute the following
+command in your terminal:
+
+```
+#in hasura CLI
+hasura metadata export
+```
+
+This will export the Metadata as YAML files in the /metadata directory
+
+### Steps for importing or applying Hasura Metadata
+
+You can apply Metadata from one Hasura Server instance to another. You can also
+apply an older or modified version of an instance's Metadata onto itself to
+replace the existing Metadata. Applying or importing completely replaces the
+Metadata on that instance, i.e. you lose any Metadata that existed before
+applying.
+
+```
+#in hasura CLI
+hasura metadata apply
+```
+
+### Reload Hasura Metadata
+
+In some cases, the Metadata can be out of sync with the database schema. For
+example, when a new column has been added to a table via an external tool.
+
+```
+#in hasura CLI
+hasura metadata reload
+```
+
+For more on Hasura Metadata, refer:
+https://hasura.io/docs/latest/migrations-metadata-seeds/manage-metadata/ For
+more on Hasura Migrations, refer:
+https://hasura.io/docs/latest/migrations-metadata-seeds/manage-migrations/

@@ -4,15 +4,17 @@
   "icon": "Grid2x2Plus",
   "pages": [
   "setup-account-and-billing", 
-  "create-an-organization-and-application",
-  "add-network-nodes-and-explorer",
-  "add-private-keys-and-user-wallets",
+  "create-an-application",
+  "add-network-and-nodes",
+  "add-private-keys",
   "setup-code-studio",
   "deploy-smart-contracts",
   "setup-api-portal",
   "setup-graph-middleware",
   "setup-offchain-database",
   "setup-storage",
-  "deploy-frontend-or-custom-services"
+  "deploy-custom-services",
+  "integration-studio",
+  "audit-logs"
  ]
 }
