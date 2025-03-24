@@ -3,16 +3,16 @@ title: Getting Started
 description: Overview of blockchain development process
 ---
 
-# Application development journey on SettleMint
+## Application development journey on SettleMint
 
 1. **Blockchain infrastructure setup** (network and node configuration)
-2. **Smart contract development** (code, test, deploy)
-3. **Middleware & API Creation** (auto-generated REST/GraphQL endpoints and
-   APIs, smart contract indexing)
-4. **Off-Chain data srorage and integration** (storage, databases, enterprise
-   systems)
-5. **Security & compliance** (private key management, token-based
+2. **Security & compliance** (private key management, token-based
    authentication)
+3. **Smart contract development** (code, test, deploy)
+4. **Middleware & API Creation** (auto-generated REST/GraphQL endpoints and
+   APIs, smart contract indexing)
+5. **Off-Chain data srorage and integration** (storage, databases, enterprise
+   systems)
 6. **Deployment & scaling** (packaging your app for production)
 
 **Brief Step-by-Step Guide** to help you create a working blockchain app
@@ -34,7 +34,20 @@ operational in the **Blockchain Explorer**.
 4. Enable load balancing and secure transaction signing. 
 5. Check network activity and node health in the Explorer.
 
-### 2. Develop and deploy smart contracts
+### 2. Generate keys and tokens
+
+Select the right private key management strategy—software, HD wallets, or
+HSM—based on your security profile. Generate private keys and attach them to transaction signers.
+Generate and use **Access Tokens (PAT/AAT)** for controlling platform or API interactions. 
+
+<ins>Brief Step-by-Step Guide:</ins>
+1. Pick a key management approach that fits your risk tolerance. 
+2. Issue PATs for developers, AATs for back-end services. 
+3. Set up logging, monitoring, and regular security reviews. 
+4. Conduct or schedule compliance audits as needed. 
+5. Document any custom security protocols for internal reference.
+
+### 3. Develop and deploy smart contracts
 
 Write on-chain logic in **Code Studio** (Solidity/Chaincode) or the **SDK CLI**.
 Rely on frameworks like Foundry/Hardhat for testing, then compile and deploy
@@ -48,7 +61,7 @@ version control.
 4. Inspect events in the Explorer to verify success. 
 5. Move to production upon final validation.
 
-### 3. Enable APIs and middleware
+### 4. Setup Middlwares and get APIs
 
 The **Smart Contract API Portal** converts your contract ABI into immediate REST
 or GraphQL endpoints. The **Graph Middleware** handles read operations, indexing
@@ -62,7 +75,7 @@ Indexer** can manage trust attestations for identity or compliance.
 4. Add specialized indexers (e.g., EAS) for credential or compliance data. 
 5. Test endpoints in a simple front end or script.
 
-### 4. Integrate and finalize the application
+### 5. Integrate and finalize the application
 
 Enterprise-grade dApps often require off-chain data handling. Connect **S3
 (MinIO)** or **IPFS** for files, and use **Hasura** on PostgreSQL for structured
@@ -77,19 +90,6 @@ logic seamlessly interacts with centralized services.
 4. Sync on-chain calls and off-chain records in real time.
 5. Confirm data consistency and reliability via logs or Explorer audits.
 
-### 5. Secure and comply
-
-Select the right private key management strategy—software, HD wallets, or
-HSM—based on your security profile. Use **Access Tokens (PAT/AAT)** for
-controlling platform or API interactions. Align deployments with recognized
-certifications (ISO 27001, SOC 2) to ease compliance processes.
-
-<ins>Brief Step-by-Step Guide:</ins>
-1. Pick a key management approach that fits your risk tolerance. 
-2. Issue PATs for developers, AATs for back-end services. 
-3. Set up logging, monitoring, and regular security reviews. 
-4. Conduct or schedule compliance audits as needed. 
-5. Document any custom security protocols for internal reference.
 
 ### 6. Deploy, monitor, and scale
 

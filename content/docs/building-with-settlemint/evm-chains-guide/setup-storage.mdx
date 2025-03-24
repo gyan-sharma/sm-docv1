@@ -20,42 +20,28 @@ import { Card } from "fumadocs-ui/components/card";
 }}>
   Summary  
   <div style={{ fontSize: "16px", fontWeight: "normal", marginTop: "5px" }}>
-To build a blockchain application, the first step is setting up a blockchain network with the correct number of validating and non-validating nodes. You can either deploy a permissioned network such as Hyperledger Besu or GoQuorum, or connect to an L1 or L2 Public Network like Ethereum, Polygon PoS, Hedera, Polygon zkEVM, Avalanche, Arbitrum, or Optimism. Both mainnet and testnet versions are available for public networks.
 
-When creating an application on SettleMint, you will be prompted to select a
-network and assign it a name. By default, a first validating node is deployed
-along with the network, and you must assign a name to it as well. You may
-optionally provide an EC DSA P256 private key to use as custom key material for
-the node identity. If no key is provided, SettleMint will generate one
-automatically and save it in your private keys.
+To integrate off-chain file storage into your blockchain application, you can configure either IPFS (for decentralized content addressing) or MinIO (an S3-compatible private storage layer) through the SettleMint platform. Both options serve different use cases—IPFS excels in immutability and decentralized access, while S3-style storage is better for secure, private, and high-performance file delivery.
 
-In SettleMint-managed (SaaS) mode, you will need to choose between a shared or
-dedicated cluster for deployment. You can also select a cloud provider and a
-data center of your choice. Additionally, you will have the option to select
-from small, medium, or large resource packs, which can be scaled up or down
-later as needed.
+To get started, navigate to the relevant application in your SettleMint workspace and open the Storage section from the left-hand menu. Click Add Storage, which opens a configuration form. Choose the storage type—either IPFS for decentralized or MinIO for private object storage. Assign a name and configure your deployment settings like region, provider, and resource pack. Once confirmed, the storage service will be deployed and available for use.
 
-Before deploying the network, you will have the option to configure network
-settings and customize the genesis file. For most use cases, it is recommended
-to keep the default settings. Once configured, you can proceed with deployment.
-After a few minutes, your network manager and first node will be fully
-operational.
+Once provisioned, you can access and manage your storage instance from the Manage Storage section. Here, you will be able to view the storage endpoint, health status, and metadata configuration. If using IPFS, you’ll be interacting with content hashes (CIDs), while MinIO offers an S3-compatible interface where files are stored under buckets and can be accessed via signed URLs.
 
-To enhance reliability, you should add more nodes to your network for fault
-tolerance. The best practice is to deploy four validator nodes and two
-non-validator nodes. Once the nodes are set up, adding a load balancer will help
-distribute network traffic efficiently and improve performance.
+Using the SettleMint SDK or CLI, developers will be able to list, query, and manage storage instances programmatically. The SDK provides a typed interface to connect, upload, retrieve, and delete files. For example, the @settlemint/sdk-ipfs package allows seamless pinning and retrieval of files using CIDs. Similarly, @settlemint/sdk-minio wraps around common S3 operations like uploading files, generating expirable download URLs, and managing buckets.
 
-Once your network, nodes, and load balancer are running, you can access the
-Insights tab to integrate monitoring tools. For permissioned networks, you can
-add Blockscout Blockchain Explorer to track transactions and network activity.
-If you are using public EVM networks, publicly available blockchain explorers
-can be used instead.
+Depending on your use case, both IPFS and MinIO can serve as complementary layers. For public-facing and immutable content—such as NFT metadata, DAO governance artifacts, or verifiable documents—IPFS is well suited. For private, regulated, or access-controlled files—like KYC documents, user uploads, admin reports, and internal metadata—MinIO offers a robust alternative with access control and performance guarantees.
+
+In practice, a dApp may use both systems in tandem: the file is stored in S3/MinIO for fast access and usability, while its content hash is stored on IPFS (and optionally, linked on-chain) to provide tamper-proof guarantees and content validation. This hybrid model ensures performance, security, and decentralization where it matters most.
+
+Once storage is connected, users and developers can begin uploading files via frontend integrations, backend scripts, or SDK calls. Content uploaded to IPFS will return a CID, which can be persisted on-chain or referenced in subgraphs and APIs. Files on S3/MinIO can be secured using signed URLs or policies, making them suitable for user role–based access or limited-time file sharing.
+
 
 </div>
 </div>
 
-# Off-chain File Storage Use Cases in Blockchain Applications
+
+
+## Off-chain File Storage Use Cases in Blockchain Applications
 
 Blockchain applications often require storing documents, images, videos, or
 metadata off-chain due to cost, performance, or privacy reasons. Two common
@@ -229,3 +215,26 @@ decentralization.
 
   </Tab>
 </Tabs>
+
+
+<div style={{
+  backgroundColor: "#D1E5E8", 
+  color: "#000000", 
+  padding: "0.5px 10px 10px 10px",
+  borderRadius: "10px", 
+  fontSize: "18px", 
+  fontWeight: "light",
+  lineHeight: "1.2",
+  textAlign: "left"
+}}>
+Congratulations.!!
+
+You have succesfully added S3 and IPFS storage to your application environment.  
+
+From here we will proceed to adding custom container deployments where you can host your application front end user interface or any other service or services required to complete your application.
+
+</div>
+
+```
+Keywords:ipfs, s3, storage, off-chain storage, decentralized storage, centralized storage, file storage, cid, minio, content hash, immutable storage, verifiable data, signed urls, bucket storage, nft metadata, kyc documents, hybrid dapp, storage sdk, storage cli, settlemint platform, ipfs sdk, minio sdk, storage deployment, file uploads, secure file access, access control, performance storage, ipfs integration, s3 integration, storage management, blockchain file storage, user uploads, metadata storage, tamper-proof files, content delivery, file persistence, private storage, public storage, smart contract file reference
+```
