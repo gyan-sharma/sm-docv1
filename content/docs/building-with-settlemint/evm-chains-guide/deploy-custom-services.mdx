@@ -9,6 +9,34 @@ import { Callout } from "fumadocs-ui/components/callout";
 import { Steps } from "fumadocs-ui/components/steps";
 import { Card } from "fumadocs-ui/components/card";
 
+<div style={{
+  backgroundColor: "#e1eafd", 
+  color: "#356fee", 
+  padding: "0.5px 10px 10px 10px",
+  borderRadius: "10px", 
+  fontSize: "18px", 
+  fontWeight: "bold",
+  lineHeight: "1.2",
+  textAlign: "left"
+}}>
+  Summary  
+  <div style={{ fontSize: "16px", fontWeight: "normal", marginTop: "5px" }}>
+To build a blockchain application, the first step is setting up a blockchain network with the correct number of validating and non-validating nodes. You can either deploy a permissioned network such as Hyperledger Besu or GoQuorum, or connect to an L1 or L2 Public Network like Ethereum, Polygon PoS, Hedera, Polygon zkEVM, Avalanche, Arbitrum, or Optimism. Both mainnet and testnet versions are available for public networks.
+
+When creating an application on SettleMint, you will be prompted to select a network and assign it a name. By default, a first validating node is deployed along with the network, and you must assign a name to it as well. You may optionally provide an EC DSA P256 private key to use as custom key material for the node identity. If no key is provided, SettleMint will generate one automatically and save it in your private keys.
+
+In SettleMint-managed (SaaS) mode, you will need to choose between a shared or dedicated cluster for deployment. You can also select a cloud provider and a data center of your choice. Additionally, you will have the option to select from small, medium, or large resource packs, which can be scaled up or down later as needed.
+
+Before deploying the network, you will have the option to configure network settings and customize the genesis file. For most use cases, it is recommended to keep the default settings. Once configured, you can proceed with deployment. After a few minutes, your network manager and first node will be fully operational.
+
+To enhance reliability, you should add more nodes to your network for fault tolerance. The best practice is to deploy four validator nodes and two non-validator nodes. Once the nodes are set up, adding a load balancer will help distribute network traffic efficiently and improve performance.
+
+Once your network, nodes, and load balancer are running, you can access the Insights tab to integrate monitoring tools. For permissioned networks, you can add Blockscout Blockchain Explorer to track transactions and network activity. If you are using public EVM networks, publicly available blockchain explorers can be used instead.
+
+</div>
+</div>
+
+
 ## How to use custom deployments to host application frontend or other custom services in SettleMint platform
 
 A Custom Deployment allows you to deploy your own Docker images, such as
