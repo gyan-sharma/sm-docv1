@@ -28,9 +28,9 @@ import { Card } from "fumadocs-ui/components/card";
   </div>
 </div>
 
-The goal of this tutorial is to design and build a simple User Profile Manager
+The goal of this tutorial is to design and build a simple User Data Manager
 using Solidity. While the visible use case is centered around managing user
-profiles (such as name, email, age, etc.), the hidden objective is to
+data (such as name, email, age, etc.), the hidden objective is to
 demonstrate the core thought process behind building a smart contract that can
 store, update, read, and soft delete data on the blockchain.
 
@@ -54,11 +54,11 @@ develop and deploy smart contracts on SettleMint platform.
 pragma solidity ^0.8.24;
 
 /**
- * @title User
+ * @title UserData
  * @notice This contract manages user profiles through create, update, and delete operations.
  * It emits events for each operation to enable off-chain indexing and notifications.
  */
-contract User {
+contract UserData {
 
     // ===================================================
     // Section 1: Structs
@@ -288,7 +288,7 @@ This table maps traditional Web2-style CRUD operations to the equivalent Solidit
 When you deploy an **Empty** smart contract set on SettleMint platfrom, you get
 a very simple **Counter.sol** contract as an example, you may delete it.
 
-In the contracts folder create a file called **User.sol** and copy paste the
+In the contracts folder create a file called **UserData.sol** and copy paste the
 content of the above smart contract code.
 
 ## 3. Prepare deployment script
@@ -303,12 +303,13 @@ In this folder create a file called **deployUser.ts**
 ```ts
 import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
 
-const UserModule = buildModule("UserModule", (m) => {
-  const user = m.contract("User");
-  return { user };
+const UserDataModule = buildModule("UserDataModule", (m) => {
+  const userdata = m.contract("UserData");
+  return { userdata };
 });
 
-export default UserModule;
+export default UserDataModule;
+
 ```
 
 **Let's understand key parts of this code-**
@@ -316,14 +317,14 @@ export default UserModule;
 This deployment script uses Hardhat Ignition to define and execute the
 deployment of a smart contract. It begins by importing the buildModule function
 from the Ignition library, which is used to define a deployment module. The
-module is named "UserModule" and is constructed using a callback function that
+module is named "UserDataModule" and is constructed using a callback function that
 receives a context object m.
 
-Within this function, m.contract("User") declares that a contract named User
+Within this function, m.contract("UserData") declares that a contract named UserData
 (which must match the name inside the Solidity source file) should be deployed.
 This is how it knows which contract is being refered.
 
-The deployed contract instance is stored in a variable called user. This
+The deployed contract instance is stored in a variable called userdata. This
 instance is then returned from the module so it can be accessed later if needed.
 Finally, the module is exported as the default export so it can be run by
 Hardhat’s Ignition system using the CLI.
@@ -339,17 +340,24 @@ produces debugging information, source maps, and compiler settings. These
 outputs are essential for deploying, testing, and integrating the contract with
 dApps or frontend applications.
 
-![Compile smart contract code](../../../img/building-with-settlemint/evm-compile.png)
+
+
+If you compile using Foundry Build then in **out** folder a folder will be created with the name of your smart contract file name, and within that folder, contractname.json and contractname.metadata.json will be generated. 
+This contractname will be what you have as the name of the contract within solidity file.
+![Foundry Compile Smart Contract](../../../img/building-with-settlemint/foundry-build.png)
+
+If you compile using Hardhat Build, then in **artifacts** folder a folder will be created with the name of your smart contract file name, and within that folder - artifacts.d.ts, ContractName.d.ts, ContractName.dbg.ts, ContractName.json are generated. ContractName.json is the ABI. 
+![Hardhat Compile Smart Contract](../../../img/building-with-settlemint/hardhat-build.png)
 
 When you compile a Solidity smart contract in SettleMint , it processes .sol
 files and generates various output artifacts needed for deployment and
-interaction. For example, after compiling User.sol, you get the following inside
+interaction. For example, after compiling UserData.sol, you get the following inside
 the artifacts/ directory:
 
-📂 artifacts/contracts/User.sol/ 
-- Counter.json – This is the main artifact file. It contains the ABI (Application Binary Interface) - The compiler metadata 
-- Counter.dbg.json – Debugging info including source maps and AST 
-- Counter.d.ts – TypeScript definition file for better type safety when using the contract in frontend or scripting environments 
+📂 artifacts/contracts/UserData.sol/ 
+- UserData.json – This is the main artifact file. It contains the ABI (Application Binary Interface) - The compiler metadata 
+- UserData.dbg.json – Debugging info including source maps and AST 
+- UserData.d.ts – TypeScript definition file for better type safety when using the contract in frontend or scripting environments 
 - artifacts.d.ts – Global TypeScript declarations for all compiled contracts
 
 📂 artifacts/build-info/ 
@@ -374,7 +382,7 @@ Hardhat) enable expressive and readable test assertions.
 
 ### Foundry test
 
-In the **test** folder in IDE, create a **User.t.sol** file for HardHat test
+In the **test** folder in IDE, create a **UserData.t.sol** file for HardHat test
 script.
 
 It uses forge-std/Test.sol is a powerful utility library provided by Foundry’s
@@ -396,14 +404,14 @@ between expected and actual results.
 pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
-import "../contracts/User.sol"; // Adjust if your contract is in a different folder
+import "../contracts/UserData.sol"; // Adjust the import path if needed
 
 contract UserTest is Test {
-    User public user;
+    UserData public user;
 
     function setUp() public {
         // Deploy the contract before each test
-        user = new User();
+        user = new UserData();
     }
 
     function testCreateProfile() public {
@@ -411,7 +419,7 @@ contract UserTest is Test {
         user.createProfile(1, "Alice", "alice@email.com", 30, "USA", true);
 
         // Fetch the profile struct
-        User.UserProfile memory profile = user.getProfile(1);
+        UserData.UserProfile memory profile = user.getProfile(1);
 
         // Assert values match what we set
         assertEq(profile.name, "Alice");
@@ -430,7 +438,7 @@ contract UserTest is Test {
         user.updateProfile(2, "Bob Updated", "bob@new.com", 29, "Canada", true);
 
         // Fetch the updated profile
-        User.UserProfile memory profile = user.getProfile(2);
+        UserData.UserProfile memory profile = user.getProfile(2);
 
         // Assert updated values
         assertEq(profile.name, "Bob Updated");
@@ -490,7 +498,7 @@ contract UserTest is Test {
         // Re-create it with new data (allowed due to soft-deletion)
         user.createProfile(8, "TomNew", "tom@new.com", 21, "Spain", false);
 
-        User.UserProfile memory profile = user.getProfile(8);
+        UserData.UserProfile memory profile = user.getProfile(8);
 
         assertEq(profile.name, "TomNew");
         assertEq(profile.email, "tom@new.com");
@@ -501,43 +509,29 @@ contract UserTest is Test {
     }
 }
 ```
-![Foundry Test Pass](../../../img/building-with-settlemint/foundry-test-pass-cli.png)
+![Foundry Test Pass](../../../img/building-with-settlemint/foundry-test.png)
 
 
 ### Hardhat test
 
-Start test network using **Hardhat - Start Network** script in task manager.
-![Start Hardhat Local Network](../../../img/building-with-settlemint/hardhat-local-network.png)
 
-In the **test** folder in IDE, create a **User.ts** file for HardHat test
+In the **test** folder in IDE, create a **UserData.ts** file for HardHat test
 script.
 
-This test script leverages Hardhat’s modern support for viem, a lightweight and
-fast alternative to Ethers.js, designed for more efficient interaction with
-Ethereum contracts. The test uses loadFixture from
-hardhat-toolbox-viem/network-helpers to ensure test isolation and efficient
-deployments—each test gets a clean contract instance to work with.
-
-Inside the script, we define a fixture function (deployUserFixture) to deploy
-the User contract and provide access to the publicClient. The tests cover all
-core functionalities of the contract: creating, updating, reading, and
-soft-deleting user profiles. Assertions are written using Chai’s expect syntax,
-while contract interactions (like write.createProfile and read.getProfile)
-follow the Viem pattern, making the test code both concise and expressive.
 
 ```ts
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
 import { expect } from "chai";
 import hre from "hardhat";
 
-// Describe our test suite for the User contract
-describe("User", function () {
-  // deployUserFixture deploys the User contract using viem and returns the deployed contract instance
+// Describe our test suite for the UserData contract
+describe("UserData", function () {
+  // deployUserFixture deploys the UserData contract using viem and returns the deployed contract instance
   // along with the address of the first wallet client.
   async function deployUserFixture() {
-    // Deploy the User contract using viem.
-    // The contract name ("User") must match your contract’s name.
-    const userContract = await hre.viem.deployContract("User");
+    // Deploy the UserData contract using viem.
+    // The contract name ("UserData") must match your contract’s name.
+    const userContract = await hre.viem.deployContract("UserData");
     // Get the first wallet client's account address to use as a signer for simulate calls.
     const account = (await hre.viem.getWalletClients())[0].account.address;
     return { userContract, account };
@@ -574,7 +568,13 @@ describe("User", function () {
       // Read the stored profile from the contract using the read method.
       const profile = await userContract.read.getProfile([
         sampleProfile.userId,
-      ]);
+      ]) as {
+        name: string;
+        email: string;
+        age: number;
+        country: string;
+        isKYCApproved: boolean;
+      };
 
       // Assert that the returned profile data matches our input values.
       expect(profile.name).to.equal(sampleProfile.name);
@@ -642,7 +642,13 @@ describe("User", function () {
       // Read the updated profile.
       const updated = await userContract.read.getProfile([
         sampleProfile.userId,
-      ]);
+      ]) as {
+        name: string;
+        email: string;
+        age: number;
+        country: string;
+        isKYCApproved: boolean;
+      };
 
       // Verify that the email was updated.
       expect(updated.email).to.equal("alice@updated.com");
@@ -710,18 +716,38 @@ describe("User", function () {
     });
   });
 });
-
 ```
+
+This test script leverages Hardhat’s modern support for viem, a lightweight and
+fast alternative to Ethers.js, designed for more efficient interaction with
+Ethereum contracts. The test uses loadFixture from
+hardhat-toolbox-viem/network-helpers to ensure test isolation and efficient
+deployments—each test gets a clean contract instance to work with.
+
+Inside the script, we define a fixture function (deployUserFixture) to deploy
+the User contract and provide access to the publicClient. The tests cover all
+core functionalities of the contract: creating, updating, reading, and
+soft-deleting user profiles. Assertions are written using Chai’s expect syntax,
+while contract interactions (like write.createProfile and read.getProfile)
+follow the Viem pattern, making the test code both concise and expressive.
+
 Please run **Hardhat Test** script to test the smart contract
 
-![Hardhat Test Pass](../../../img/building-with-settlemint/hardhat-test-pass-cli.png)
+![Hardhat Test Pass](../../../img/building-with-settlemint/hardhat-test.png)
+
+
 
 Once the test is pass, you can deploy to local hardhat network by using script - **Hardhat - Deploy to Local Network**
 
-![Hardhat Deploy Local](../../../img/building-with-settlemint/hardhat-deploy-local-cli.png)
+Start test network using **Hardhat - Start Network** script in task manager.
+
+![Start Hardhat Local Network](../../../img/building-with-settlemint/hardhat-start-test-network.png)
+
+Deploy to test network
+![Hardhat Deploy Local](../../../img/building-with-settlemint/hardhat-deploy-on-test-network.png)
 
 If you click on **Hardhat Deploy to Local Network** and nothing happens, then you are missing the step to select the correct deployment script and hitting enter key. 
-You will see a message - **Extra commandline arguments, e.g. --verify (Press 'Enter' to confirm or 'Escape' to cancel)** in the top middle of the IDE, hit enter, you will see **ignition/modules/main.ts**, edit the last part at put the correct filename (e.g. deployUser.ts), basically the name of the deployment script you created in ignition folder, and hit enter agian to run the deployment script.
+You will see a message - **Extra commandline arguments, e.g. --verify (Press 'Enter' to confirm or 'Escape' to cancel)** in the top middle of the IDE, hit enter, you will see **ignition/modules/main.ts**, edit the last part at put the correct filename (e.g. deployUserData.ts), basically the name of the deployment script you created in ignition folder, and hit enter agian to run the deployment script.
 This remains true for all the deploy cases, whether on local network or platform network.
 
 ## 6. Deploy the smart contract
@@ -729,7 +755,7 @@ This remains true for all the deploy cases, whether on local network or platform
 Hardhat deploy to platform network enter the path of the deployment script
 ![Select node to deploy](../../../img/building-with-settlemint/select-deployment-script.png)
 
-ignition/modules/deployUser.ts
+ignition/modules/deployUserData.ts
 
 >
 >If you click on **Hardhat Deploy to Local Network** and nothing happens, then you are missing the step to select the correct deployment script and hitting enter key. 
@@ -742,23 +768,19 @@ ignition/modules/deployUser.ts
 Select the node to which you wish to deploy this smart contract. If you get an
 error, please ensure that a private key was created and attached to the node on
 which you wish to deploy the smart contract.
-![Select node to deploy](../../../img/building-with-settlemint/select-node-cli.png)
 
 Select the private key you wish to use to deploy smart contract. If you are
 using a public network or a network with gas fee, then make sure that this
 private key's wallet is funded.
-![Select private key to deploy](../../../img/building-with-settlemint/select-private-key-cli.png)
 
 Select yes when prompted - **Confirm deploy to network (network name)? ›
 (y/N)**.
 
 Wait for a few minutes for the contrcat to be deployed.
 
-![Contract Deployed](../../../img/building-with-settlemint/contract-deployed-cli.png)
-
 Deployed contract address is stored in deployed_addresses.json file located in igntition>deployments folder.
 
-![Deployed Contract Address](../../../img/building-with-settlemint/deployed-contract-address.png)
+![Contract Deployed](../../../img/building-with-settlemint/contract-deployed-cli.png)
 
 
 

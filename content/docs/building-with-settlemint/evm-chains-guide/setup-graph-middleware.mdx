@@ -131,67 +131,108 @@ blockchain node in place.
 </Tabs>
 
 
-## 1. Collect constants needed
+## Subgraph folder structure in Code Studio IDE
 
-Find the chain ID of the network from Blockchain Networks > Selcted Network > Details page, it will be something like **47440**
+```
+subgraph/
+│
+├── subgraph.config.json
+│
+├── datasources/
+│   ├── mycontract.gql.json
+│   ├── mycontract.ts
+│   └── mycontract.yaml
+│
+└── fetch/
+└── mycontract.ts
+```
+
+### 1. subgraph.config.json
+This file contains the global configuration for your subgraph. It specifies:
+  - output: The directory where generated files will be stored.
+  - chain: The blockchain network to index (e.g., localhost, rinkeby, mainnet).
+  - datasources: An array listing each contract datasource that the subgraph will index. Each entry defines the contract address, the block number to start indexing from, and the module (folder) containing the datasource’s files.
+
+### 2. datasources/mycontract.gql.json
+This file is a JSON representation of your GraphQL schema. It defines the entities that the subgraph will index and store in the Graph Node’s database.
+
+### 3. datasources/mycontract.yaml
+This YAML manifest configures how the subgraph ingests on-chain data from your contract. It specifies the contract address, ABI, event handlers, entities, and mapping file.
+Be very careful about YAML structure, any deviation or missing indentation can cause errors. 
+
+### 4. datasources/mycontract.ts
+This AssemblyScript file contains the logic that listens for events and writes data into the Graph’s store by updating entities.
+
+### 5. fetch/mycontract.ts
+This file provides a reusable function to fetch or create MyEntity instances. It helps avoid repetitive code in your mapping file.
+
+
+## Subgraph deployment process
+
+### 1. Collect constants needed
+
+Find the chain ID of the network from igntition>deployments folder name (chain-ID) or from the Platform UI at Blockchain Networks > Selcted Network > Details page, it will be something like **47440**.
+
 Locate the contract address, deployed contract address is stored in deployed_addresses.json file located in igntition>deployments folder.
 
 
-## 2. Building subgraph.config.json file
+### 2. Building subgraph.config.json file
 
 ```json
 {
   "output": "generated/scs.",
-  "chain": "47440",
+  "chain": "44819",
   "datasources": [
     {
-      "name": "User",
-      "address": "0xd8C9C4Fc1F71869D54fAF8df6b1C5F7421a1e15b",
+      "name": "UserData",
+      "address": "0x8b1544B8e0d21aef575Ce51e0c243c2D73C3C7B9",
       "startBlock": 0,
-      "module": ["user"]
+      "module": ["userdata"]
     }
   ]
 }
 ```
 
-## 3 Create user.yaml file inside subgraph/datasources/user.yaml 
+### 3 Create userdata.yaml file
 
 ```yaml
-
-- kind: ethereum/contract
-  name: User
-  network: chain47440
-  source:
-    address: "0xd8C9C4Fc1F71869D54fAF8df6b1C5F7421a1e15b"
-    abi: User
-    startBlock: 0
-  mapping:
-    kind: ethereum/events
-    apiVersion: 0.0.5
-    language: wasm/assemblyscript
-    entities:
-      - UserProfile
-    abis:
-      - name: User
-        file: "{root}/out/User.sol/User.json"
-    eventHandlers:
-      - event: ProfileCreated(indexed uint256)
-        handler: handleProfileCreated
-      - event: ProfileUpdated(indexed uint256)
-        handler: handleProfileUpdated
-      - event: ProfileDeleted(indexed uint256)
-        handler: handleProfileDeleted
-    file: ./user.ts
-
+  - kind: ethereum/contract
+    name: {id}
+    network: {chain}
+    source:
+      address: "{address}"
+      abi: UserData
+      startBlock: {startBlock}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.5
+      language: wasm/assemblyscript
+      entities:
+        - UserProfile
+        - ProfileCreated
+        - ProfileUpdated
+        - ProfileDeleted
+      abis:
+        - name: UserData
+          file: "{root}/out/UserData.sol/UserData.json"
+      eventHandlers:
+        - event: ProfileCreated(indexed uint256,string,string,uint8,string,bool)
+          handler: handleProfileCreated
+        - event: ProfileUpdated(indexed uint256,string,string,uint8,string,bool)
+          handler: handleProfileUpdated
+        - event: ProfileDeleted(indexed uint256)
+          handler: handleProfileDeleted
+      file: {file}
 ```
 
 
-## 4. Create user.gql.json, This defines your GraphQL schema (save as subgraph/datasources/user.gql.json):
+### 4. Create userdata.gql.json file
 
 ```
 [
   {
     "name": "UserProfile",
+    "description": "Represents the current state of a user's profile.",
     "fields": [
       { "name": "id", "type": "ID!" },
       { "name": "name", "type": "String!" },
@@ -199,449 +240,187 @@ Locate the contract address, deployed contract address is stored in deployed_add
       { "name": "age", "type": "Int!" },
       { "name": "country", "type": "String!" },
       { "name": "isKYCApproved", "type": "Boolean!" },
-      { "name": "isDeleted", "type": "Boolean!" },
-      { "name": "createdAt", "type": "BigInt" },
-      { "name": "updatedAt", "type": "BigInt" }
+      { "name": "isDeleted", "type": "Boolean!" }
+    ]
+  },
+  {
+    "name": "ProfileCreated",
+    "description": "Captures the event when a new user profile is created.",
+    "fields": [
+      { "name": "id", "type": "ID!" },
+      { "name": "userId", "type": "BigInt!" },
+      { "name": "userProfile", "type": "UserProfile!" }
+    ]
+  },
+  {
+    "name": "ProfileUpdated",
+    "description": "Captures the event when an existing user profile is updated.",
+    "fields": [
+      { "name": "id", "type": "ID!" },
+      { "name": "userId", "type": "BigInt!" },
+      { "name": "userProfile", "type": "UserProfile!" }
+    ]
+  },
+  {
+    "name": "ProfileDeleted",
+    "description": "Captures the event when a user profile is soft-deleted.",
+    "fields": [
+      { "name": "id", "type": "ID!" },
+      { "name": "userId", "type": "BigInt!" },
+      { "name": "userProfile", "type": "UserProfile!" }
     ]
   }
 ]
 ```
 
-## 5. user.ts (event handlers) Create subgraph/datasources/user.ts:
+### 5. Create userdata.ts file
 
 ```ts
-import { BigInt } from "@graphprotocol/graph-ts"
+import { BigInt } from "@graphprotocol/graph-ts";
 import {
+  ProfileCreated as ProfileCreatedEvent,
+  ProfileUpdated as ProfileUpdatedEvent,
+  ProfileDeleted as ProfileDeletedEvent
+} from "../../generated/userdata/UserData";
+import {
+  UserProfile,
   ProfileCreated,
   ProfileUpdated,
   ProfileDeleted
-} from "../../generated/User/User"
-import { UserProfile } from "../../generated/schema"
-
-export function handleProfileCreated(event: ProfileCreated): void {
-  const id = event.params.userId.toString()
-  let user = new UserProfile(id)
-
-  user.name = ""
-  user.email = ""
-  user.age = 0
-  user.country = ""
-  user.isKYCApproved = false
-  user.isDeleted = false
-  user.createdAt = event.block.timestamp
-  user.updatedAt = event.block.timestamp
-
-  user.save()
+} from "../../generated/schema";
+import { fetchUserProfile } from "../fetch/userdata";
+ 
+export function handleProfileCreated(event: ProfileCreatedEvent): void {
+  // Generate a unique event ID using transaction hash and log index
+  let id = event.transaction.hash.toHex() + "-" + event.logIndex.toString();
+  let entity = new ProfileCreated(id);
+  entity.userId = event.params.userId;
+ 
+  // Fetch or create the UserProfile entity
+  let profile = fetchUserProfile(event.params.userId);
+  profile.name = event.params.name;
+  profile.email = event.params.email;
+  profile.age = event.params.age;
+  profile.country = event.params.country;
+  profile.isKYCApproved = event.params.isKYCApproved;
+  profile.isDeleted = false;
+  profile.save();
+ 
+  // Link the event entity to the user profile and save
+  entity.userProfile = profile.id;
+  entity.save();
 }
 
-export function handleProfileUpdated(event: ProfileUpdated): void {
-  const id = event.params.userId.toString()
-  let user = UserProfile.load(id)
+export function handleProfileUpdated(event: ProfileUpdatedEvent): void {
+  let id = event.transaction.hash.toHex() + "-" + event.logIndex.toString();
+  let entity = new ProfileUpdated(id);
+  entity.userId = event.params.userId;
 
-  if (user == null) {
-    user = new UserProfile(id)
-    user.createdAt = event.block.timestamp
-  }
+  // Retrieve and update the existing UserProfile entity
+  let profile = fetchUserProfile(event.params.userId);
+  profile.name = event.params.name;
+  profile.email = event.params.email;
+  profile.age = event.params.age;
+  profile.country = event.params.country;
+  profile.isKYCApproved = event.params.isKYCApproved;
+  profile.isDeleted = false;
+  profile.save();
 
-  // Keep existing values until full field update data is included in event
-  user.updatedAt = event.block.timestamp
-  user.save()
+  entity.userProfile = profile.id;
+  entity.save();
 }
 
-export function handleProfileDeleted(event: ProfileDeleted): void {
-  const id = event.params.userId.toString()
-  let user = UserProfile.load(id)
+export function handleProfileDeleted(event: ProfileDeletedEvent): void {
+  let id = event.transaction.hash.toHex() + "-" + event.logIndex.toString();
+  let entity = new ProfileDeleted(id);
+  entity.userId = event.params.userId;
 
-  if (user) {
-    user.isDeleted = true
-    user.updatedAt = event.block.timestamp
-    user.save()
-  }
+  // Retrieve the UserProfile entity and mark it as deleted
+  let profile = fetchUserProfile(event.params.userId);
+  profile.isDeleted = true;
+  profile.save();
+
+  entity.userProfile = profile.id;
+  entity.save();
 }
 ```
 
-## 6. create subgraph.yaml in the root directory 
+### 6. Create another userdata.ts in the fetch folder
 
-```yaml
-specVersion: 0.0.5
-description: Tracks user profiles (create, update, delete)
-repository: https://github.com/your-org/your-repo
-schema:
-  file: ./generated/user.schema.graphql
+```ts
+import { BigInt } from "@graphprotocol/graph-ts";
+import { UserProfile } from "../../generated/schema";
 
-dataSources:
-  - kind: ethereum/contract
-    name: User
-    network: chain47440
-    source:
-      address: "0xd8C9C4Fc1F71869D54fAF8df6b1C5F7421a1e15b"
-      abi: User
-      startBlock: 0
-    mapping:
-      kind: ethereum/events
-      apiVersion: 0.0.5
-      language: wasm/assemblyscript
-      entities:
-        - UserProfile
-      abis:
-        - name: User
-          file: ./out/User.sol/User.json
-      eventHandlers:
-        - event: ProfileCreated(indexed uint256)
-          handler: handleProfileCreated
-        - event: ProfileUpdated(indexed uint256)
-          handler: handleProfileUpdated
-        - event: ProfileDeleted(indexed uint256)
-          handler: handleProfileDeleted
-      file: ./subgraph/datasources/user.ts
+/**
+ * Fetches a UserProfile entity using the given userId.
+ * If it does not exist, a new UserProfile entity is created with default values.
+ *
+ * @param userId - The user ID as a BigInt.
+ * @returns The UserProfile entity.
+ */
+export function fetchUserProfile(userId: BigInt): UserProfile {
+  let id = userId.toString();
+  let user = UserProfile.load(id);
 
+  if (!user) {
+    user = new UserProfile(id);
+    user.name = "";
+    user.email = "";
+    user.age = 0;
+    user.country = "";
+    user.isKYCApproved = false;
+    user.isDeleted = false;
+  }
+
+  return user;
+}
 ```
 
 
 Run Codegen script
+
+![Graph Codegen](../../../img/building-with-settlemint/graph-codegen.png)
+
 Run Graph Build script
+
+![Graph Build](../../../img/building-with-settlemint/graph-build.png)
+
 Run Graph deploy script
 
+![Graph Deploy](../../../img/building-with-settlemint/graph-deploy.png)
 
 
 
 
+### Why we see a duplicay in the GraphQL schema - 
 
+In The Graph’s autogenerated schema, each entity is provided with two types of queries by default:
 
-In The Graph’s autogenerated schema, each entity gets two types of queries by default:
-	1.	A single-entity query (by ID)
-	2.	A multi-entity query (to list/filter all records)
+- **Single-Entity Query:**  
+  `userProfile(id: ID!): UserProfile`  
+  *Fetches a single `UserProfile` by its unique ID.*
 
-For example, if you have an entity named UserProfile, The Graph automatically generates:
-	•	userProfile(id: ID!): Fetch a single UserProfile by its id.
-	•	userProfiles(...): Fetch a list of UserProfile entities, with optional filters.
+- **Multi-Entity Query:**  
+  `userProfiles(...): [UserProfile]`  
+  *Fetches a list of `UserProfile` entities, with optional filters to refine the results.*
 
-⸻
 
-Why “getProfile” vs. “profiles”?
-	•	getProfile(...) likely comes from your contract method (i.e., function getProfile(uint256 userId)) that the subgraph recognized as a read (call) or you explicitly added as a handler in the subgraph.
-	•	profiles(...) (or userProfiles) is the autogenerated multi-entity query for your UserProfile entity.
+Why This Duplication Exists
+	-	**Flexibility in Data Access:**
+By offering both single-entity and multi-entity queries, The Graph allows you to choose the most efficient way to access your data. If you know the exact ID, you can use the single query for a quick lookup. If you need to display or analyze a collection of records, the multi-entity query is available.
+	-	**Optimized Performance:**
+Retrieving a specific record via the single-entity query avoids unnecessary overhead that comes with filtering through a list, ensuring more efficient data access when the unique identifier is known.
+	-	**Catering to Different Use Cases:**
+Different parts of your application may require different query types. Detailed views might need a single record (using userProfile), while list views benefit from the filtering and pagination offered by userProfiles.
+	-	**Consistency Across the Schema:**
+Generating both queries for every entity ensures a consistent API design, which simplifies development by providing a predictable pattern for data access regardless of the entity.
+	
 
-So in your GraphQL explorer, you’ll see both:
-	1.	getProfile(userId: ...) – a direct call to the contract function, if you exposed it in your subgraph’s schema or as a call handler.
-	2.	profiles(...) (or userProfiles) – the standard “list” query for all UserProfile entities that The Graph generates automatically.
+### Graph Middleware - Querying data 
 
-⸻
+We can query based on the ID
+![Graph Query Profile](../../../img/building-with-settlemint/graph-query-profile.png)
 
-Do you need both?
-	•	If you only want to rely on the indexed data in the subgraph (which is usually the point of The Graph), you can query the subgraph’s standard fields: userProfile(id: ...) and userProfiles(...).
-	•	If you still want a direct contract read for “getProfile,” that’s a separate feature. Sometimes people include call handlers for contract read functions, but most subgraphs stick to event-driven data.
+Or we can query to return all entries
+![Graph Query multiple Profiles](../../../img/building-with-settlemint/graph-query-profiles.png)
 
-In short, “getProfile” is from your contract method, while “profiles” is The Graph’s built-in listing query for your UserProfile entity. They serve similar but not identical purposes:
-	•	getProfile returns live data from the contract (if implemented as a call handler).
-	•	profiles (or userProfiles) returns data stored/indexed by The Graph from past events.
-
-If you don’t need the direct contract read, you can remove or ignore getProfile. Otherwise, keep both and use whichever suits your data needs.
-
-
-
-
-
-
-
-
-
-
-## The Graph Middleware
-
-The Graph provides powerful indexing capabilities for EVM chains through
-subgraphs. Use this middleware when you need:
-
-- Custom indexing logic through subgraph manifests
-- Complex GraphQL queries
-- Real-time data updates
-
-### Using The Graph SDK
-
-```typescript
-import { createTheGraphClient } from "@settlemint/sdk-thegraph";
-
-const { client: graphClient, graphql } = createTheGraphClient({
-  instances: JSON.parse(
-    process.env.SETTLEMINT_THEGRAPH_SUBGRAPHS_ENDPOINTS || "[]"
-  ),
-  accessToken: process.env.SETTLEMINT_ACCESS_TOKEN!,
-  subgraphName: "your-subgraph",
-});
-```
-
-<Callout type="tip">
-  For detailed API reference and advanced usage examples, check out the
-  [TheGraph SDK
-  documentation](https://github.com/settlemint/sdk/tree/main/sdk/thegraph).
-</Callout>
-
-### Using The Graph Middleware
-
-[The Graph](https://thegraph.com/en/) is a protocol for indexing and querying
-blockchain data from networks. It can be used with all EVM-compatible chains
-like Ethereum, Hyperledger Besu, Polygon, Avalanche, etc. You can run it on your
-own blockchain nodes (both public and permissioned).
-
-Using the Graph protocol, you can create **subgraphs** that define which
-blockchain data will be indexed. The middleware will then use these subgraphs to
-correctly index your smart contracts and expose a developer-friendly and
-efficient **GraphQL API**, allowing you to query the data you need.
-
-We have some prebuilt subgraph indexing modules included in the smart contract
-set, and you can build your own modules if you have a custom smart contract set.
-
-<Callout type="warning">
-  Before you start, make sure you are running an EVM-compatible network
-  (Ethereum, Polygon, Hyperledger Besu, Avalanche, etc.)
-</Callout>
-
-When the middleware is deployed, follow these steps to start using it:
-
-### Define and deploy a subgraph
-
-Navigate to the **smart contract set** which you want to index, go the
-**details** and open the **IDE**. Here you will define the subgraph to set the
-indexing specifications, and deploy it so it can be loaded into the middleware.
-There are instructions included in the IDE to help you.
-
-#### Subgraph raw configuration
-
-Inside the root you will find a file called `subgraph.config.json` that contains
-the raw configuration of the subgraph. The important section is the
-**datasources** section.
-
-- **Name** - here we defined the smart contracts with their name (the name of
-  the artifact created in the 'deployments' folder when running the deploy task)
-- **Address & Startblock** - You will notice the startblock and address to be 0.
-  You must fill these in when your contract has been deployed. The block number
-  and the address can be found in the **deployment** folder, under **ignition**.
-- **Module** - In the modules array all the indexing modules to activate for
-  this smart contract.
-
-#### About the indexing modules
-
-We provide **two libraries** of indexing modules: one by the **OpenZeppelin**
-team for all the common smart contracts in their smart contract library, and one
-by the **SettleMint** team to extend the capabilities of the OpenZeppelin one,
-and to provide indexing of the specific SettleMint smart contract sets.
-
-The OpenZeppelin set contains the following indexing modules:
-
-- accesscontrol
-- erc1155
-- erc1967upgrade
-- erc20
-- erc721
-- governor
-- ownable
-- pausable
-- timelock
-- voting
-
-The SettleMint set contains the following indexing modules:
-
-- erc721ipfs: to extend the ERC-721 from OpenZeppelin to index IPFS metadata of
-  your ERC-721 tokens
-- crowdsale/vestingvault/vestingwallet: to index and expose all the data for the
-  crowdsale contract set
-- forwarder: for the ERC-20 Meta transactions forwarder data
-- statemachinemetadata: to index IPFS metadata for state machines
-
-These are available in the `subgraph` folder in your IDE. You can create your
-own modules for any other data you want to index, or for custom smart contracts
-not part of the default sets. And you can modify the existing ones if you want
-to index things a bit different.
-
-#### Write your own indexing module
-
-You can also write your own custom indexing module for smart contracts that are
-not part of the default sets.
-
-Follow these steps to create a custom indexing module:
-
-- Primitives to generate a GraphQL schema: `subgraph/datasource/x.gql.json` - In
-  order to allow composability, the schema are not defined in the GraphQL format
-  but rather in a dedicated JSON format which is can be assembled and compiled
-  to GraphQL.
-- Template to generate a subgraph manifest: `subgraph/datasource/x.yaml` - This
-  file lists all the events that the datasources should listen to, and links
-  that to the corresponding indexing logic.
-- Indexing logic: `subgraph/datasources/x.ts` and (optionally)
-  `subgraph/fetch/x.ts` - This is the core logic that processes the events to
-  index the onchain activity.
-
-[To learn more, check it out on Github.](https://github.com/OpenZeppelin/openzeppelin-subgraphs)
-
-#### Start your subgraph
-
-The following tasks need to be run in this sequence:
-
-- `btp-scs subgraph codegen` - Generates the AssemblyScript types for your
-  contracts ABI.
-- `btp-scs subgraph build` - Compiles the WASM files based on the outputs
-  generated by `btp-scs subgraph codegen`.
-- `btp-scs subgraph deploy` - Deploys the WASM files to IPFS and updates the
-  middleware to start or update the indexing.
-
-The indexing of your smart contracts has now started. This can take a while, but
-once done you can query the middleware for your data in seconds using the
-**GraphQL API**. You can find the **endpoint** in the **Connect-tab**.
-
-## The Smart Contract Portal Middleware
-
-The Smart Contract Portal is a middleware which creates an easy to use api on
-top of your smart contracts. It can be used with all EVM-compatible chains like
-Ethereum, Hyperledger Besu, Polygon, Avalanche, etc. You can run it on your own
-blockchain nodes (both public and permissioned) or on a Load Balancer.
-
-Benefits of using the smart contract portal:
-
-1. Simplified Integration: APIs allow developers to interact with complex smart
-   contract functions through familiar interfaces, reducing the need to
-   understand blockchain-specific languages and protocols.
-2. Data Aggregation: APIs can consolidate data from multiple smart contracts,
-   providing a unified view.
-3. Improved Performance: GraphQL optimizes data fetching, ensuring that clients
-   retrieve only the necessary data in a single request, reducing network load
-   and improving performance.
-4. Stack agnostic: Teams are free to choose their own technology stack.
-
-<Callout type="warning">
-  Before you start, make sure you are running an EVM-compatible network
-  (Ethereum, Polygon, Hyperledger Besu, Avalanche, etc.) and have a private key
-  to deploy your smart contracts.
-</Callout>
-
-### Using The Smart Contract Portal Middleware
-
-The Portal middleware provides instant API access to your smart contracts. Key
-features include:
-
-- Auto-generated REST & GraphQL APIs
-- Built-in webhooks for event notifications
-- Type-safe contract interactions
-- Automatic ABI parsing
-
-### Using The Portal SDK
-
-```typescript
-import { createPortalClient } from "@settlemint/sdk-portal";
-
-const { client: portalClient, graphql: portalGraphql } = createPortalClient({
-  instance: process.env.SETTLEMINT_PORTAL_GRAPHQL_ENDPOINT,
-  accessToken: process.env.SETTLEMINT_ACCESS_TOKEN,
-});
-```
-
-<Callout type="tip">
-  For comprehensive API documentation and advanced features, check out the
-  [Portal SDK
-  documentation](https://github.com/settlemint/sdk/tree/main/sdk/portal).
-</Callout>
-
-### Upload an ABI
-
-A smart contract ABI (Application Binary Interface) is a standardized way for
-interacting with smart contracts in the Ethereum blockchain and other compatible
-systems. It serves as the bridge between human-readable contract code (written
-in languages like Solidity) and the Ethereum Virtual Machine (EVM), which
-executes the contract. The ABI specifies the functions that can be called on the
-contract, including their names, input parameters, and output types.
-
-When deploying a smart contract the ABI file can be found as part of the
-artificats. See
-[Deploying the Smart Contract](/developer-guides/connect-frontend#adding-the-abi).
-Download the ABI json files and save them on your local filesystem.
-
-When creating a new middleware you'll need to upload at least one ABI.
-
-To update the ABIs of an existing smart contract portal middleware navigate to
-the middleware, go the details and click on the 'Manage Middleware' button on
-the top right. Click on the 'Update ABIs' item and a dialog will open. In this
-dialog upload the ABI file(s) you saved on your local filesystem in the previous
-step.
-
-![Update ABIs](../../../img/using-the-platform/scp-update-abis.png)
-
-### REST
-
-A fully typed REST api with documentation is created out of the Smart Contract
-ABI, you can discover all its endpoints on the REST tab. To see examples in your
-technology of choice use the dropdown in the example section on the right.
-
-![REST](../../../img/using-the-platform/scp-rest.png)
-
-### GraphQL
-
-The GraphQL api exposes the same functionality as the REST api, you can discover
-it on the GraphQL tab.
-
-![GraphQL](../../../img/using-the-platform/scp-graphql.png)
-
-### Webhooks
-
-On the Webhooks tab you can register your own webhook. The portal will send
-events to this webhook when a transaction is processed.
-
-When sending a message the event will have a signature which allows the receiver
-to validate if the event has not been tampered with.
-
-The secret to validate the signature can be copied from the details page of your
-webhook.
-
-![Webhooks](../../../img/using-the-platform/scp-webhooks.png)
-
-Standard Webhooks has built
-[SDKs and useful tools](https://www.standardwebhooks.com/#resources) using
-different programming languages that make it easy to start using webhooks.
-
-An example using Typescript, [Elysia](https://elysiajs.com/) and
-[standard webhooks](https://www.standardwebhooks.com/).
-
-```ts
-import { Elysia, t } from "elysia";
-import { Webhook } from "standardwebhooks";
-
-async function webhookConsumerBootstrap(secret: string) {
-  const webhookConsumer = new Elysia().post(
-    "/scp-listener",
-    ({ headers, body }) => {
-      try {
-        const wh = new Webhook(btoa(secret));
-        const verifiedPayload = wh.verify(JSON.stringify(body.payload), {
-          "webhook-id": headers["btp-portal-event-id"]!,
-          "webhook-signature": headers["btp-portal-event-signature"]!,
-          "webhook-timestamp": headers["btp-portal-event-timestamp"]!,
-        });
-        console.log(
-          `Received a webhook event: ${JSON.stringify(verifiedPayload)}`
-        );
-      } catch (err) {
-        console.error("Webhook payload invalid", err);
-        throw err;
-      }
-    },
-    {
-      body: t.Object({
-        payload: t.Object({
-          apiVersion: t.String(),
-          eventId: t.String(),
-          eventName: t.String(),
-          timestamp: t.Number(),
-          data: t.Any(),
-        }),
-      }),
-    }
-  );
-  const app = new Elysia().use(webhookConsumer).onStart(({ server }) => {
-    console.log(
-      `Started the test webhook consumer on ${server?.url.toString()}`
-    );
-  });
-}
-```
-
-<Callout type="info">
-  All operations require appropriate permissions in your workspace.
-</Callout>

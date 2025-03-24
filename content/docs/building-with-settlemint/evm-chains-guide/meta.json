@@ -11,7 +11,8 @@
   "deploy-smart-contracts",
   "setup-api-portal",
   "setup-graph-middleware",
-  "setup-storage-and-offchain-database",
+  "setup-offchain-database",
+  "setup-storage",
   "deploy-frontend-or-custom-services"
  ]
 }
