@@ -357,6 +357,11 @@ button[data-search-full] {
 /* Define code block height */
 
 pre {
-  max-height: 20rem !important; 
+  max-height: 20rem !important;
   overflow-y: auto;
+}
+
+p {
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
