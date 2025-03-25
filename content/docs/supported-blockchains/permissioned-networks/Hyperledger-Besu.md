@@ -60,16 +60,11 @@ much greater transaction throughput.
 
 **SettleMint's Enterprise Ethereum networks always use QBFT**
 
-In IBFT 2.0 networks, a group of nodes are selected to form the pool of
-validators. These nodes will be in charge of determining if a proposed block is
-suitable for addition to the chain. One of these validator nodes will be
-arbitrarily selected as the proposer. This single proposer, having received
-messages from the pool of validators, will decide what to add to the chain. This
-is presented as a proposed block to the other validators. Only if a majority
-(66% or more) of the validators deems the block valid will it be added to the
-ledger. At the end of each consensus round, the validators select a new proposer
-and the process is repeated. IBFT 2.0 has immediate finality. There are no forks
-and all valid blocks are included in the main chain.
+In QBFT networks, a set of validator nodes is responsible for maintaining consensus on the blockchain. Similar to IBFT, these validators participate in a round-based process to propose and validate blocks. At the start of each round, one validator is chosen as the proposer. This proposer puts forward a new block to be added to the chain.
+
+The remaining validators review the proposed block and share their votes. If a supermajority (at least 66%) of the validators agree that the block is valid, it is finalized and committed to the chain. Like IBFT 2.0, QBFT achieves immediate finality — blocks are either committed or discarded in a single round. There are no forks, and every valid block becomes a permanent part of the main chain.
+
+QBFT enhances performance and fault tolerance over IBFT by introducing optimizations for large validator sets, making it better suited for enterprise-grade and high-throughput networks.
 
 When you deploy a Hyperledger Besu blockchain network on SettleMint, it should
 be Byzantine fault tolerance.
