@@ -8,9 +8,7 @@
     "oauth",
     "postgresql",
     "redis",
-    "s3-compatible-storage",
-    "azure-blob-storage",
-    "google-cloud-storage",
+    "storage",
     "secret-management",
     "metrics-and-logs",
     "terraform"

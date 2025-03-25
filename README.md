@@ -6,7 +6,20 @@
 ## Prerequisites
 
 - [Bun](https://bun.sh/) installed
-- Node.js version specified in `.nvmrc`
+- [Node.js](https://nodejs.org/en/download/) version specified in `.nvmrc`
+
+Install bun on mac
+
+```
+curl -fsSL https://bun.sh/install | bash
+```
+
+Install bun on Windows 
+
+```
+powershell -c "irm bun.sh/install.ps1 | iex"
+```
+
 
 ## Getting Started
 

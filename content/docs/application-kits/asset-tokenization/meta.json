@@ -1,5 +1,6 @@
 {
   "label": "Asset Tokenization",
-  "icon": "Grid2x2Plus",
-  "pages": ["contracts", "usecases", "asset-tokenization-kit"]
+  "title": "Asset Tokenization",
+  "icon": "Bolt",
+  "pages": ["asset-tokenization-kit", "contracts", "usecases"]
 }

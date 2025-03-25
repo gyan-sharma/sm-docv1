@@ -20,14 +20,19 @@ import { Card } from "fumadocs-ui/components/card";
 }}>
   Summary  
   <div style={{ fontSize: "16px", fontWeight: "normal", marginTop: "5px" }}>
-To send transactions on a blockchain, you need a private key (with enough funds for gas for networks with a fee). You can create and manage private keys directly within SettleMint using ECDSA, HD ECDSA, or HSM key types. 
+To send transactions on a blockchain, you need a private key (with enough funds for gas for networks with a fee). You can create and manage private keys directly within SettleMint using ECDSA, HD ECDSA, or HSM key types.
 
-After creating a key, it must be attached to at least one node to enable transaction signing—this is critical for smart contract deployment. Without it, the deployment will fail.
+After creating a key, it must be attached to at least one node to enable
+transaction signing—this is critical for smart contract deployment. Without it,
+the deployment will fail.
 
-SettleMint also offers User Wallets, a scalable solution that generates wallets from a single HD ECDSA 256 key. Each user gets a unique address for privacy and parallel transaction support. You can create user wallets once your HD key is deployed and running, and fund them as needed for gas-based transactions.
+SettleMint also offers User Wallets, a scalable solution that generates wallets
+from a single HD ECDSA 256 key. Each user gets a unique address for privacy and
+parallel transaction support. You can create user wallets once your HD key is
+deployed and running, and fund them as needed for gas-based transactions.
+
 </div>
 </div>
-
 
 ## How to add private keys and user wallets in SettleMint platform
 
@@ -45,14 +50,16 @@ When you deploy a blockchain node it contains a signing proxy that captures the
 eth_sendTransaction call, uses the appropriate key from the private key section
 to sign it, and sends it onwards to the blockchain node. You can use this proxy
 directly via the nodes JSON-RPC endpoints
-([https://eth.wiki/json-rpc/API](https://eth.wiki/json-rpc/API)) and via tools
-like Hardhat
-([https://hardhat.org/config/#json-rpc-based-networks](https://hardhat.org/config/#json-rpc-based-networks))
-configured to use the "remote" default option for signing.
+([JSON RPC](https://ethereum.org/en/developers/docs/apis/json-rpc/)) and via
+tools like Hardhat
+([HardHat RPC](https://hardhat.org/config/#json-rpc-based-networks)) configured
+to use the "remote" default option for signing.
 
 ## Create a private key
 
-To add a private key in the SettleMint platform, navigate to the Private keys section and click Create a private key. You’ll be prompted to select the type of private key—ECDSA P256, HD ECDSA P256, or HSM ECDSA P256. 
+To add a private key in the SettleMint platform, navigate to the Private keys
+section and click Create a private key. You’ll be prompted to select the type of
+private key—ECDSA P256, HD ECDSA P256, or HSM ECDSA P256.
 ![Add Private Key](../../../img/building-with-settlemint/add-private-key.png)
 
 <Tabs items={['SDK CLI', 'Platform UI','SDK JS']}>
@@ -118,24 +125,43 @@ To add a private key in the SettleMint platform, navigate to the Private keys se
 
 ![Attach Private Key to Node](../../../img/building-with-settlemint/add-key-to-node.png)
 
-Every smart contract deployment involves a transaction that must be signed by an authorized account. This signature proves that the transaction came from a valid identity and permits it to be processed by the network. When using SettleMint, deploying a smart contract via the platform UI or SDK initiates an eth_sendTransaction call, which must be signed by a private key. However, nodes cannot inherently sign transactions unless a key has been explicitly activated and attached to them.
+Every smart contract deployment involves a transaction that must be signed by an
+authorized account. This signature proves that the transaction came from a valid
+identity and permits it to be processed by the network. When using SettleMint,
+deploying a smart contract via the platform UI or SDK initiates an
+eth_sendTransaction call, which must be signed by a private key. However, nodes
+cannot inherently sign transactions unless a key has been explicitly activated
+and attached to them.
 
-If no private key is attached to the node involved in the deployment, the process will halt at the signing step. The platform will not be able to authorize the deployment transaction, resulting in a failed operation. This makes key-to-node assignment a required step in any production or test setup involving deployment, contract interactions, or any state-changing blockchain transaction.
+If no private key is attached to the node involved in the deployment, the
+process will halt at the signing step. The platform will not be able to
+authorize the deployment transaction, resulting in a failed operation. This
+makes key-to-node assignment a required step in any production or test setup
+involving deployment, contract interactions, or any state-changing blockchain
+transaction.
 
-**How to attach a private key to a node**
-	1.	Go to the Private keys section of your SettleMint workspace.
-	2.	Click on the private key (e.g., “Deployer”) you wish to use for signing transactions.
-	3.	Navigate to the Nodes tab of that private key’s page.
-	4.	You’ll see a list of available nodes in your network (Validator and RPC nodes).
-	5.	Select the nodes that should use this key for transaction signing. These will usually be RPC nodes or validators depending on your setup.
-	6.	Once selected, the key becomes active on these nodes and is used for signing all outgoing transactions initiated from the platform.
+**How to attach a private key to a node** 
+1. Go to the Private keys section of
+your SettleMint workspace. 
+2. Click on the private key (e.g., “Deployer”) you
+wish to use for signing transactions. 
+3. Navigate to the Nodes tab of that
+private key’s page. 
+4. You’ll see a list of available nodes in your network
+(Validator and RPC nodes). 
+5. Select the nodes that should use this key for
+transaction signing. These will usually be RPC nodes or validators depending on
+your setup. 
+6. Once selected, the key becomes active on these nodes and is used
+for signing all outgoing transactions initiated from the platform.
 
-**Best practices and nuances**
-	1.	Always attach the key to at least one node before deploying a smart contract. In most cases, attaching it to an RPC node is sufficient.
-	2.	Avoid attaching the same key to multiple nodes unless required, to reduce the risk of key misuse or unnecessary transaction replay.
-	3.	Ensure the private key has sufficient funds (ETH or native token) to pay for gas costs associated with contract deployment if working on public chains or non-zero gas fee networks.
-	4.	For security reasons, only assign signing permissions to nodes you trust and control.
-	5.	Consider using an HD key if you want to manage multiple identities derived from the same mnemonic, but ensure the correct derivation path is used.
+**Best practices and nuances** 
+1. Always attach the key to at least one node
+before deploying a smart contract. In most cases, attaching it to an RPC node is sufficient. 
+2. Avoid attaching the same key to multiple nodes unless required, to reduce the risk of key misuse or unnecessary transaction replay. 
+3. Ensure the private key has sufficient funds (ETH or native token) to pay for gas costs associated with contract deployment if working on public chains or non-zero gas fee networks. 
+4. For security reasons, only assign signing permissions to nodes you trust and control. 
+5. Consider using an HD key if you want to manage multiple identities derived from the same mnemonic, but ensure the correct derivation path is used.
 
 ## Manage private keys
 
@@ -199,7 +225,6 @@ contain enough funds to cover the gas price.
   networks that require gas fees.
 </Callout>
 
-
 ## User Wallets
 
 SettleMint's **User Wallets** feature offers a production-ready solution for
@@ -225,15 +250,14 @@ wallets on a different node. Click **Confirm** to deploy the wallet.
 
 When your deployment status is **Running**, you can click on it to check the
 details. You can see the Mnemonic from which the user wallets are generated
-under **Key material**. Upon initialization, the User Wallets section is empty. To create your first
-user wallet, click on **Create a user wallet**.
+under **Key material**. Upon initialization, the User Wallets section is empty.
+To create your first user wallet, click on **Create a user wallet**.
 
 ![Create User Wallet](../../../img/building-with-settlemint/user-wallet.png)
 
-Remember that for networks that require gas to perform a transaction, the user wallet should
-contain enough funds to cover the gas price. You can fund it using the address
-displayed in the list.
-
+Remember that for networks that require gas to perform a transaction, the user
+wallet should contain enough funds to cover the gas price. You can fund it using
+the address displayed in the list.
 
 <div style={{
   backgroundColor: "#D1E5E8", 
@@ -247,11 +271,12 @@ displayed in the list.
 }}>
 Congratulations.!!
 
-You have successfully created Private Keys and User Wallets. 
+You have successfully created Private Keys and User Wallets.
 
-You have also attached private keys to node transaction signer and you are ready for smart contract development and deployment.
+You have also attached private keys to node transaction signer and you are ready
+for smart contract development and deployment.
+
 </div>
-
 
 ```
 Keywords
