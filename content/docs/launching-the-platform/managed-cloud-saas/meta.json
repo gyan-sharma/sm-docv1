@@ -4,9 +4,6 @@
   "icon": "Cloud",
   "pages": [
     "supported-cloud-providers",
-    "create-an-account",
-    "about-organizations",
-    "deployment-plans",
-    "quickstart"
+    "deployment-plans"
   ]
 }

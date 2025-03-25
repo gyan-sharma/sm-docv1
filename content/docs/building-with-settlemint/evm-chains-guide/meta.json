@@ -3,7 +3,6 @@
   "title": "EVM Chains Guide",
   "icon": "Grid2x2Plus",
   "pages": [
-    "setup-account-and-billing",
     "create-an-application",
     "add-network-and-nodes",
     "add-private-keys",

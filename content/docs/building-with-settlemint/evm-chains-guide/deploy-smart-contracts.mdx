@@ -77,16 +77,26 @@ develop and deploy smart contracts on SettleMint platform.
 
 ## 1. Let's start with the solidity smart contract code
 
-A smart contract is a self-executing program deployed on the blockchain that defines rules and logic for how data or assets are managed without relying on intermediaries. In this tutorial, we are writing our smart contract using Solidity, the most widely adopted programming language for Ethereum and EVM-compatible blockchains. Solidity is a statically typed, contract-oriented language designed specifically for writing smart contracts that run on the Ethereum Virtual Machine (EVM).
+A smart contract is a self-executing program deployed on the blockchain that
+defines rules and logic for how data or assets are managed without relying on
+intermediaries. In this tutorial, we are writing our smart contract using
+Solidity, the most widely adopted programming language for Ethereum and
+EVM-compatible blockchains. Solidity is a statically typed, contract-oriented
+language designed specifically for writing smart contracts that run on the
+Ethereum Virtual Machine (EVM).
 
-If you’re new to Solidity or want to deepen your understanding, here are some helpful resources:
-	-	Official Solidity Documentation: https://soliditylang.org/
-	- Solidity by Example (interactive guide): https://solidity-by-example.org
-	-	CryptoZombies (gamified Solidity learning): https://cryptozombies.io/en/solidity
+If you’re new to Solidity or want to deepen your understanding, here are some
+helpful resources: - Official Solidity Documentation:
+https://soliditylang.org/ - Solidity by Example (interactive guide):
+https://solidity-by-example.org - CryptoZombies (gamified Solidity learning):
+https://cryptozombies.io/en/solidity
 
-These resources provide both foundational knowledge and hands-on coding exercises to help you become comfortable with writing and deploying smart contracts.
+These resources provide both foundational knowledge and hands-on coding
+exercises to help you become comfortable with writing and deploying smart
+contracts.
 
-In your learning phase, you can also use ChatGPT: https://chatgpt.com/ or any of your go to AI tools for generation of basic solidity smart contracts.
+In your learning phase, you can also use ChatGPT: https://chatgpt.com/ or any of
+your go to AI tools for generation of basic solidity smart contracts.
 
 ### Example UserData smart contract solidity code
 
@@ -293,19 +303,22 @@ contract UserData {
 }
 ```
 
-
->Please ensure that smart contract emits all required paramters in every event,
->otherwise, while indexing we will not get the parameters which are not emited.
-
+> Please ensure that smart contract emits all required paramters in every event,
+> otherwise, while indexing we will not get the parameters which are not emited.
 
 ## Smart Contract — Events & Functions Overview
 
-In a smart contract, we define a clear set of events and functions to manage the lifecycle of user profiles. These building blocks enable seamless interaction with the contract—supporting profile creation, updates, retrieval, and soft deletion—while ensuring all changes are traceable through emitted events. 
+In a smart contract, we define a clear set of events and functions to manage the
+lifecycle of user profiles. These building blocks enable seamless interaction
+with the contract—supporting profile creation, updates, retrieval, and soft
+deletion—while ensuring all changes are traceable through emitted events.
 
-Events play a crucial role in allowing off-chain services like The Graph to listen for and respond to changes in contract state, whereas functions provide the core interface for interacting with profile data on-chain.
+Events play a crucial role in allowing off-chain services like The Graph to
+listen for and respond to changes in contract state, whereas functions provide
+the core interface for interacting with profile data on-chain.
 
-Below is a structured overview of the key events and functions included in the contract:
-
+Below is a structured overview of the key events and functions included in the
+contract:
 
 | #   | Events           | Parameters                                                                                           | Description                            |
 | --- | ---------------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------- |
@@ -840,7 +853,7 @@ private key's wallet is funded.
 Select yes when prompted - **Confirm deploy to network (network name)? ›
 (y/N)**.
 
-Wait for a few minutes for the contractto be deployed.
+Wait for a few minutes for the contract to be deployed.
 
 Deployed contract address is stored in deployed_addresses.json file located in
 igntition>deployments folder.
@@ -859,7 +872,8 @@ igntition>deployments folder.
 }}>
 Congratulations.!!
 
-You have successfully compiled, tested and deployed your smart contract on blockchain network.
+You have successfully compiled, tested and deployed your smart contract on
+blockchain network.
 
 Now you can proceed to middlewares for getting APIs to do smart contract
 transactions, write data to chain and read data in a structured format.
